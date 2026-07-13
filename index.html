@@ -58,6 +58,20 @@
     border-radius:11px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer;}
   .seg.on{border-color:var(--ink); background:#fff; color:var(--ink);}
 
+  /* 설정 행 (레이블 좌 · 컨트롤 우) — iOS 설정 패턴 */
+  .optrow{display:flex; align-items:center; justify-content:space-between; padding:7px 2px; margin-bottom:4px;}
+  .optlbl{display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:var(--muted);}
+  .optlbl svg{width:16px; height:16px;}
+  /* iOS풍 토글 스위치 */
+  .switch{width:46px; height:27px; border-radius:99px; background:var(--line); position:relative; cursor:pointer; transition:background .18s; flex:none;}
+  .switch i{position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:left .18s;}
+  .switch.on{background:var(--right);}
+  .switch.on i{left:22px;}
+  /* 미니 세그먼트 컨트롤 */
+  .miniseg{display:flex; background:#E7E1D3; border-radius:9px; padding:2.5px; gap:2px;}
+  .miniseg .seg{flex:none; padding:5px 14px; border:none; background:transparent; border-radius:7px; font-size:12.5px; font-weight:700; color:var(--muted);}
+  .miniseg .seg.on{background:#fff; color:var(--ink); border:none; box-shadow:0 1px 2px rgba(27,42,74,.15);}
+
   .spacer{flex:1;}
   .btn{width:100%; border:none; border-radius:14px; padding:17px; font-size:16px; font-weight:800;
     font-family:inherit; cursor:pointer; letter-spacing:.02em;}
@@ -132,6 +146,7 @@
     .card{transition:none;}
     .prog i{transition:none;}
     .spk.playing{animation:none;}
+    .switch, .switch i{transition:none;}
   }
 </style>
 </head>
@@ -154,14 +169,21 @@
       <button id="retryIdx" class="btn ghost hidden" style="margin-top:10px; padding:12px; font-size:13px;">다시 시도</button>
     </div>
     <div class="setup-foot">
-      <div class="setrow" style="margin:0 0 12px;">
-        <div class="lbl" style="margin-bottom:9px;">
+      <div class="optrow">
+        <div class="optlbl">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
           자동발음
         </div>
-        <div class="segs" id="audioSegs">
-          <div class="seg" data-audio="auto" role="radio" tabindex="0">켬</div>
-          <div class="seg" data-audio="off" role="radio" tabindex="0">끔</div>
+        <div class="switch" id="autoSwitch" role="switch" tabindex="0" aria-checked="true" aria-label="자동발음"><i></i></div>
+      </div>
+      <div class="optrow">
+        <div class="optlbl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          발음 속도
+        </div>
+        <div class="miniseg" id="rateSegs">
+          <div class="seg" data-rate="slow" role="radio" tabindex="0">천천히</div>
+          <div class="seg" data-rate="normal" role="radio" tabindex="0">보통</div>
         </div>
       </div>
       <p class="note" id="setupNote" style="margin-top:0; margin-bottom:10px;"></p>
@@ -233,6 +255,7 @@
 /* ===== 조정 가능한 설정값 ===== */
 const RECENT_VISIBLE = 2;   // 목록에 처음부터 보이는 DAY 수 (나머지는 '더보기')
 const RECENT_DEFAULT = 2;   // 기본 체크되는 DAY 수
+const SPEECH_RATES   = { slow:0.5, normal:1.0 }; // 발음 속도 프리셋 (1=원래 속도)
 
 /* ===== localStorage (기기별 저장) ===== */
 const K_SETTINGS = "vq.settings";   // {autoplay:true}
@@ -255,7 +278,10 @@ async function fetchJson(path){
 let daysIndex = [];           // index.json의 days (최신이 위 — 순서 신뢰)
 const dayCache = {};          // id → words[] (세션 내 재사용)
 let selected = new Set();     // 선택된 DAY id
-let audioMode = LS.get(K_SETTINGS, {autoplay:true}).autoplay ? "auto" : "off";
+const _settings = LS.get(K_SETTINGS, {});
+let audioMode = _settings.autoplay===false ? "off" : "auto";
+let speechRate = SPEECH_RATES[_settings.rate] ? _settings.rate : "slow";   // 기본: 천천히
+const saveSettings = () => LS.set(K_SETTINGS, {autoplay: audioMode==="auto", rate: speechRate});
 let deck=[], pos=0, flipped=false, wrong=[];
 let sessKind="normal";        // normal(범위 학습) | review(누적 오답 복습)
 let round=0;                  // 0=본 라운드, 1+=틀린 것만 반복 라운드
@@ -284,7 +310,7 @@ function speak(text, btn){
   if(!("speechSynthesis" in window)) return;   // 미지원 브라우저는 조용히 무시
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang="en-US"; u.rate=.9; if(enVoice) u.voice=enVoice;
+  u.lang="en-US"; u.rate=SPEECH_RATES[speechRate]; if(enVoice) u.voice=enVoice;
   if(btn){ u.onstart=()=>btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
   speechSynthesis.speak(u);
 }
@@ -380,15 +406,24 @@ function updateReviewBtn(){
   if(n) $("review").textContent = `오답 복습 (${n}개)`;
 }
 
-/* 자동발음 토글 — 설정 저장 */
-function renderAudioSegs(){
-  $("audioSegs").querySelectorAll(".seg").forEach(s=>{
-    s.classList.toggle("on", s.dataset.audio===audioMode);
-    s.setAttribute("aria-checked", s.dataset.audio===audioMode);
+/* 자동발음 스위치 — 설정 저장 */
+function renderAudioSwitch(){
+  $("autoSwitch").classList.toggle("on", audioMode==="auto");
+  $("autoSwitch").setAttribute("aria-checked", audioMode==="auto");
+}
+const toggleAudio = ()=>{ audioMode = audioMode==="auto" ? "off" : "auto"; renderAudioSwitch(); saveSettings(); };
+$("autoSwitch").onclick = toggleAudio;
+$("autoSwitch").onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleAudio(); } };
+
+/* 발음 속도 토글 — 선택 즉시 미리듣기로 속도 체감 */
+function renderRateSegs(){
+  $("rateSegs").querySelectorAll(".seg").forEach(s=>{
+    s.classList.toggle("on", s.dataset.rate===speechRate);
+    s.setAttribute("aria-checked", s.dataset.rate===speechRate);
   });
 }
-$("audioSegs").querySelectorAll(".seg").forEach(s=>{
-  const pick = ()=>{ audioMode=s.dataset.audio; renderAudioSegs(); LS.set(K_SETTINGS, {autoplay: audioMode==="auto"}); };
+$("rateSegs").querySelectorAll(".seg").forEach(s=>{
+  const pick = ()=>{ speechRate=s.dataset.rate; renderRateSegs(); saveSettings(); speak("vocabulary"); };
   s.onclick = pick;
   s.onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } };
 });
@@ -524,7 +559,8 @@ $("review").onclick=()=>{
   startQuiz(cards,"review");
 };
 
-renderAudioSegs();
+renderAudioSwitch();
+renderRateSegs();
 loadIndex();
 $("scrollArea").addEventListener("scroll", updateFades, {passive:true});
 window.addEventListener("resize", updateFades);
