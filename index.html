@@ -255,7 +255,7 @@
 /* ===== 조정 가능한 설정값 ===== */
 const RECENT_VISIBLE = 2;   // 목록에 처음부터 보이는 DAY 수 (나머지는 '더보기')
 const RECENT_DEFAULT = 2;   // 기본 체크되는 DAY 수
-const SPEECH_RATES   = { slow:0.5, normal:1.0 }; // 발음 속도 프리셋 (1=원래 속도)
+const SPEECH_RATES   = { slow:0.3, normal:0.5 }; // 발음 속도 프리셋 (1=원래 속도)
 
 /* ===== localStorage (기기별 저장) ===== */
 const K_SETTINGS = "vq.settings";   // {autoplay:true}
@@ -280,7 +280,7 @@ const dayCache = {};          // id → words[] (세션 내 재사용)
 let selected = new Set();     // 선택된 DAY id
 const _settings = LS.get(K_SETTINGS, {});
 let audioMode = _settings.autoplay===false ? "off" : "auto";
-let speechRate = SPEECH_RATES[_settings.rate] ? _settings.rate : "slow";   // 기본: 천천히
+let speechRate = SPEECH_RATES[_settings.rate] ? _settings.rate : "normal"; // 기본: 보통
 const saveSettings = () => LS.set(K_SETTINGS, {autoplay: audioMode==="auto", rate: speechRate});
 let deck=[], pos=0, flipped=false, wrong=[];
 let sessKind="normal";        // normal(범위 학습) | review(누적 오답 복습)
