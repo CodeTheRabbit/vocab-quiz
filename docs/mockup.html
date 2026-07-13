@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>단어 카드 — 기능 모의</title>
+<style>
+  :root{
+    --paper:#F3EFE7; --ink:#1B2A4A;
+    --cream:#F7F3EA; --line:#D8D0C0;
+    --right:#2E9E7B; --right-d:#237A5F;
+    --wrong:#E0674F; --wrong-d:#BE4E38;
+    --muted:#6B6455; --gold:#C9A24B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;
+    background:var(--paper); color:var(--ink);
+    display:flex; justify-content:center;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .app{width:100%; max-width:460px; min-height:100dvh; display:flex; flex-direction:column; padding:18px 18px 24px;}
+  .top{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .brand{font-size:15px; letter-spacing:.02em; font-weight:800;}
+  .brand small{font-weight:600; color:var(--muted); font-size:11px; margin-left:6px; letter-spacing:0;}
+  .screen{flex:1; display:flex; flex-direction:column;}
+  .setup-layout{min-height:0;}
+  .setup-head{flex:none;}
+  .setup-scroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; min-height:80px;
+    margin:0 -4px; padding:0 4px;
+    -webkit-mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 12px,#000 calc(100% - 12px),var(--mb,#000) 100%);
+    mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 12px,#000 calc(100% - 12px),var(--mb,#000) 100%);}
+  .setup-scroll.fade-top{--mt:transparent;}
+  .setup-scroll.fade-bot{--mb:transparent;}
+  .setup-foot{flex:none; padding-top:14px; border-top:1.5px solid var(--line); margin-top:8px;}
+  .hidden{display:none !important;}
+
+  h2{font-size:13px; letter-spacing:.08em; color:var(--muted); font-weight:700; margin:6px 2px 10px; text-transform:uppercase;}
+  .days{display:flex; flex-direction:column; gap:9px;}
+  .day{display:flex; align-items:center; gap:12px; padding:14px 15px; background:var(--cream);
+    border:1.5px solid var(--line); border-radius:14px; cursor:pointer; transition:border-color .12s, background .12s;}
+  .day.on{border-color:var(--ink); background:#fff;}
+  .day .box{width:22px; height:22px; border-radius:7px; border:2px solid var(--line); flex:none;
+    display:flex; align-items:center; justify-content:center; transition:all .12s;}
+  .day.on .box{background:var(--ink); border-color:var(--ink);}
+  .day .box svg{width:13px; height:13px; opacity:0; transition:opacity .12s;}
+  .day.on .box svg{opacity:1;}
+  .day .name{font-weight:700; font-size:16px;}
+  .day .sub{color:var(--muted); font-size:12.5px; margin-top:2px;}
+  .day .recent{font-size:10px; color:var(--gold); font-weight:800; letter-spacing:.05em; margin-left:8px;}
+
+  .setrow{margin:18px 0 4px;}
+  .setrow .lbl{font-size:13px; letter-spacing:.08em; color:var(--muted); font-weight:700; text-transform:uppercase; margin-bottom:9px; display:flex; align-items:center; gap:7px;}
+  .setrow .lbl svg{width:16px; height:16px;}
+  .segs{display:flex; gap:8px;}
+  .seg{flex:1; text-align:center; padding:11px 6px; border:1.5px solid var(--line); background:var(--cream);
+    border-radius:11px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer;}
+  .seg.on{border-color:var(--ink); background:#fff; color:var(--ink);}
+
+  .spacer{flex:1;}
+  .btn{width:100%; border:none; border-radius:14px; padding:17px; font-size:16px; font-weight:800;
+    font-family:inherit; cursor:pointer; letter-spacing:.02em;}
+  .btn.primary{background:var(--ink); color:var(--cream);}
+  .btn.primary:disabled{opacity:.4;}
+  .btn.ghost{background:transparent; color:var(--muted); border:1.5px solid var(--line);}
+  .btn-row{display:flex; gap:10px;} .btn-row .btn{margin-top:0;}
+  .note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:12px; line-height:1.5;}
+
+  .qbar{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  .prog{flex:1; height:7px; background:var(--line); border-radius:99px; overflow:hidden;}
+  .prog i{display:block; height:100%; background:var(--ink); width:0; transition:width .25s ease;}
+  .count{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:700;}
+  .quit{font-size:12.5px; color:var(--muted); background:none; border:none; font-family:inherit; cursor:pointer; padding:4px;}
+
+  .card-wrap{flex:1; display:flex; flex-direction:column; justify-content:center; perspective:1200px; min-height:320px;}
+  .card{position:relative; width:100%; aspect-ratio:3/4; max-height:56dvh; transform-style:preserve-3d;
+    transition:transform .5s cubic-bezier(.2,.7,.2,1); cursor:pointer;}
+  .card.flip{transform:rotateY(180deg);}
+  .face{position:absolute; inset:0; backface-visibility:hidden; border-radius:22px; padding:24px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    box-shadow:0 10px 30px rgba(27,42,74,.14);}
+  .face .tag{position:absolute; top:18px; left:18px; font-size:11px; font-weight:800; letter-spacing:.08em;
+    padding:5px 10px; border-radius:99px; text-transform:uppercase;}
+  .face .hint{position:absolute; bottom:20px; font-size:12px; opacity:.6; font-weight:600;}
+  .front{background:linear-gradient(160deg,#22345C,#16233E); color:var(--cream);}
+  .front .tag{background:rgba(247,243,234,.14); color:var(--cream);}
+  .back{background:var(--cream); color:var(--ink); transform:rotateY(180deg); border:2px solid var(--ink);}
+  .back .tag{background:var(--ink); color:var(--cream);}
+  .word{font-size:42px; font-weight:800; line-height:1.25; word-break:keep-all;}
+  .word.small{font-size:30px;}
+  .word .sense{display:block;}
+  .word .sense + .sense{margin-top:.35em;}
+  .daylabel{position:absolute; top:18px; right:18px; font-size:11px; opacity:.5; font-weight:700;}
+  /* speaker button on card */
+  .spk{position:absolute; bottom:16px; right:16px; width:46px; height:46px; border-radius:50%;
+    border:none; cursor:pointer; display:none; align-items:center; justify-content:center;
+    background:rgba(247,243,234,.16); transition:transform .1s;}
+  .back .spk{background:var(--ink);}
+  .spk:active{transform:scale(.9);}
+  .spk.show{display:flex;}
+  .spk svg{width:22px; height:22px;}
+  .front .spk svg{stroke:var(--cream);} .back .spk svg{stroke:var(--cream);}
+  .spk.playing{animation:pulse .6s ease infinite;}
+  @keyframes pulse{50%{transform:scale(1.12);}}
+  /* POS box */
+  .pos{display:inline-flex; align-items:center; justify-content:center; min-width:1.5em; height:1.5em;
+    padding:0 .25em; margin-right:.3em; border:1.6px solid currentColor; border-radius:5px;
+    font-size:.62em; font-weight:800; vertical-align:.12em; opacity:.85; line-height:1;}
+
+  .grade{display:flex; gap:10px; margin-top:18px;} .grade .btn{margin-top:0;}
+  .btn.wrong{background:var(--wrong); color:#fff;} .btn.right{background:var(--right); color:#fff;}
+  .tapflip{text-align:center; color:var(--muted); font-size:13px; font-weight:600; margin-top:18px; height:20px;}
+
+  .result{flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;}
+  .result .big{font-size:52px; font-weight:800; letter-spacing:-.02em;}
+  .result .cap{color:var(--muted); font-size:14px; font-weight:600; margin-top:2px;}
+  .stats{display:flex; gap:12px; justify-content:center; margin:26px 0 8px;}
+  .stat{flex:1; background:var(--cream); border:1.5px solid var(--line); border-radius:14px; padding:16px 8px;}
+  .stat b{display:block; font-size:28px; font-variant-numeric:tabular-nums;}
+  .stat.r b{color:var(--right-d);} .stat.w b{color:var(--wrong-d);}
+  .stat span{font-size:12px; color:var(--muted); font-weight:700;}
+  .review-hd{margin-top:10px; text-align:left;}
+  .wlist{list-style:none; padding:0; margin:6px 0 0; max-height:26dvh; overflow:auto;}
+  .wlist li{display:flex; justify-content:space-between; gap:14px; padding:11px 4px; border-bottom:1px solid var(--line); text-align:left; align-items:baseline;}
+  .wlist .en{font-weight:700;} .wlist .ko{color:var(--muted); font-size:13.5px; text-align:right;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">단어 카드 <small>기능 모의</small></div>
+    <div class="brand"><small>DAY 09–10 샘플</small></div>
+  </div>
+
+  <!-- SETUP -->
+  <section id="setup" class="screen setup-layout">
+    <div class="setup-head">
+      <h2>범위 선택 · 최신이 위</h2>
+    </div>
+    <div class="setup-scroll" id="scrollArea">
+      <div id="days" class="days"></div>
+      <div id="daysOld" class="days hidden" style="margin-top:9px;"></div>
+      <button id="moreDays" class="btn ghost hidden" style="margin-top:10px; padding:12px; font-size:13px;"></button>
+    </div>
+    <div class="setup-foot">
+      <div class="setrow" style="margin:0 0 12px;">
+        <div class="lbl" style="margin-bottom:9px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          자동발음
+        </div>
+        <div class="segs" id="audioSegs">
+          <div class="seg on" data-audio="auto">켬</div>
+          <div class="seg" data-audio="off">끔</div>
+        </div>
+      </div>
+      <p class="note" id="setupNote" style="margin-top:0; margin-bottom:10px;"></p>
+      <button id="start" class="btn primary">학습 시작</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="screen hidden">
+    <div class="qbar">
+      <button class="quit" id="quit">← 그만</button>
+      <div class="prog"><i id="prog"></i></div>
+      <div class="count" id="count">0 / 0</div>
+    </div>
+    <div class="card-wrap">
+      <div class="card" id="card">
+        <div class="face front">
+          <span class="tag" id="fTag">영어</span>
+          <span class="daylabel" id="fDay"></span>
+          <div class="word" id="fWord"></div>
+          <span class="hint">눌러서 뜻 보기</span>
+          <button class="spk" id="fSpk" aria-label="발음 듣기">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+          </button>
+        </div>
+        <div class="face back">
+          <span class="tag" id="bTag">뜻</span>
+          <span class="daylabel" id="bDay"></span>
+          <div class="word" id="bWord"></div>
+          <span class="hint">맞았나요?</span>
+          <button class="spk" id="bSpk" aria-label="발음 듣기">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="tapflip" class="tapflip">종이에 써 본 뒤 카드를 눌러 확인</div>
+    <div id="grade" class="grade hidden">
+      <button class="btn wrong" id="gWrong">틀렸어요</button>
+      <button class="btn right" id="gRight">알아요</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen hidden">
+    <div class="result">
+      <div class="big" id="score">0%</div>
+      <div class="cap" id="scoreCap"></div>
+      <div class="stats">
+        <div class="stat r"><b id="rCnt">0</b><span>맞음</span></div>
+        <div class="stat w"><b id="wCnt">0</b><span>틀림</span></div>
+      </div>
+      <div id="reviewArea">
+        <div class="review-hd"><h2>틀린 단어</h2></div>
+        <ul class="wlist" id="wlist"></ul>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button id="redoWrong" class="btn primary">틀린 것만 다시 (맞출 때까지)</button>
+    <div class="btn-row" style="margin-top:10px;">
+      <button id="again" class="btn ghost">처음부터</button>
+      <button id="reselect" class="btn ghost">범위 다시</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- 샘플 데이터 (실제 앱은 리포의 data/dayNN.json을 fetch) ----------
+   품사표시는 데이터엔 원자료(명/동/형/부)로 두고, 표시할 때 네모 박스로 변환한다. */
+const DATA = {
+  "DAY 09": { title:"DAY 09 · Clothes", words:[
+    ["fashion","명 유행, 패션"],["design","동 디자인하다, 설계하다; 명 디자인, 설계"],["stripe","명 줄무늬"],
+    ["thread","명 실"],["needle","명 바늘"],["sew","동 바느질하다, ~을 꿰매다"],["costume","명 의상, 복장"],
+    ["label","명 상표, 라벨; 동 라벨을 붙이다"],["cotton","명 면직물; 형 면의"],["outfit","명 의복, 복장"],
+    ["suit","명 정장, 슈트; 동 어울리다, 맞다"],["trousers","명 바지"],["collar","명 옷깃, 칼라"],
+    ["trend","명 1. 유행 2. 동향, 추세"],["buckle","명 버클, 잠금장치"],["plain","형 무늬가 없는, 장식이 없는"],
+    ["fashionable","형 유행하는"],["loose","형 1. 헐렁한 2. 헐거운, 풀린"],["laundry","명 1. 세탁소 2. 세탁물"],
+    ["come up with","1. 생각해내다, 제안하다 2. 생산하다"],["detergent","명 세제"],
+    ["stain","명 얼룩, 때; 동 얼룩지다, 더럽히다"],["medium","형 중간의, 보통의"],["formal","형 1. 격식을 차린 2. 공식적인"],
+    ["casual","형 격식을 차리지 않은, 평상시의; 명 평상복"],["fade","동 (색이) 바래다, 바래게 만들다"],
+    ["complete","동 완성하다; 형 완전한"],["alter","동 1. 수선하다 2. 바꾸다"],["along with","~과 함께, ~에 덧붙여"],
+    ["for oneself","1. 혼자 힘으로 2. 자신을 위해서"]
+  ]},
+  "DAY 10": { title:"DAY 10 · School & Education", words:[
+    ["semester","명 학기"],["peer","명 1. 또래, 친구 2. 동료"],["session","명 1. 학기 2. 수업 3. (특정 활동을 위한) 시간"],
+    ["dormitory","명 기숙사, 공동 침실"],["entrance","명 1. 입학 2. 입장, 들어감 3. 입구"],["kindergarten","명 유치원"],
+    ["term","명 1. 학기 2. 용어"],["genius","명 1. 천재, 천재성 2. 특별한 재능"],["advice","명 조언, 충고"],
+    ["counsel","명 1. 조언 2. 상담; 동 조언하다"],["graduate","동 졸업하다; 명 1. 졸업생 2. 대학원생"],
+    ["scold","동 야단치다, 꾸짖다"],["oral","형 구술의, 구두의"],["instruct","동 1. 가르치다 2. 지시하다"],
+    ["educate","동 가르치다, 교육하다"],["lecture","명 강의, 강연; 동 강의하다"],["apply","동 1. 지원하다, 신청하다 2. 적용하다"],
+    ["examine","동 1. 시험을 실시하다 2. 조사하다"],["content","명 내용, 목차"],["turn in","제출하다"],
+    ["pupil","명 1. 학생 2. 제자, 문하생"],["fluent","형 유창한"],["behavior","명 행동, 품행"],
+    ["institution","명 1. 기관, 단체 2. 제도"],["expose","동 1. 접하게 하다 2. 드러내다, 노출하다"],
+    ["concentrate","동 집중하다, 전념하다"],["pronounce","동 1. 발음하다 2. 선언하다"],
+    ["demonstrate","동 1. 보여주다, 설명하다 2. 증명하다 3. 시위하다"],["play a role in","~에서 역할을 하다"],
+    ["go over","1. 검토하다, 조사하다 2. 건너가다"]
+  ]}
+};
+/* --- 목록 시연용 과거 DAY (더미). 실제 앱에선 리포의 파일이 그대로 쌓인다 --- */
+[
+  ["DAY 01","Numbers & Time",[["clock","명 시계"],["hour","명 시간"],["minute","명 분"],["century","명 세기, 100년"],["moment","명 순간, 잠깐"]]],
+  ["DAY 02","Family",[["parent","명 부모"],["relative","명 친척; 형 상대적인"],["nephew","명 조카"],["sibling","명 형제자매"]]],
+  ["DAY 03","Body",[["muscle","명 근육"],["bone","명 뼈"],["skin","명 피부"],["throat","명 목구멍, 인후"],["wrist","명 손목"]]],
+  ["DAY 04","Food",[["flavor","명 맛, 풍미"],["recipe","명 조리법"],["ingredient","명 재료, 성분"],["boil","동 끓다, 끓이다"]]],
+  ["DAY 05","House",[["furniture","명 가구"],["ceiling","명 천장"],["basement","명 지하실"],["drawer","명 서랍"],["closet","명 벽장"]]],
+  ["DAY 06","Weather",[["forecast","명 예보; 동 예보하다"],["humid","형 습한"],["breeze","명 산들바람"],["storm","명 폭풍"]]],
+  ["DAY 07","Travel",[["luggage","명 짐, 수하물"],["passport","명 여권"],["depart","동 출발하다"],["arrive","동 도착하다"],["souvenir","명 기념품"]]],
+  ["DAY 08","Emotions",[["anxious","형 불안한"],["delighted","형 아주 기뻐하는"],["frustrate","동 좌절시키다"],["grief","명 큰 슬픔"]]]
+].forEach(([k,sub,words])=>{ DATA[k]={title:`${k} · ${sub}`, words}; });
+const RECENT_DEFAULT = 2;   // 기본 선택(체크)
+const RECENT_VISIBLE = 2;   // 기본 노출(나머지는 '더보기')
+
+/* 품사표시 → 네모 박스. 세미콜론(품사 경계)에서 개행 분리 */
+function posHtml(ko){
+  const boxed = ko.replace(/(^|[\s;])(명|동|형|부)(?=\s)/g,
+    (m,pre,p)=> pre + '<span class="pos">'+p+'</span>').replace(/\s+(?=<span class="pos")/g,' ');
+  return boxed.split(/\s*;\s*/).map(s=>s.trim()).filter(Boolean)
+    .map(s=>`<span class="sense">${s}</span>`).join("");
+}
+
+let selected=new Set(), audioMode="auto";
+let deck=[], pos=0, flipped=false, wrong=[], reviewing=false;
+const $ = id => document.getElementById(id);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+/* ---------- 발음 (Web Speech API) ---------- */
+let enVoice=null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  enVoice = vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, btn){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=.9; if(enVoice) u.voice=enVoice;
+  if(btn){ u.onstart=()=>btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
+  speechSynthesis.speak(u);
+}
+
+/* ---------- 셋업 ---------- */
+function dayNum(k){ const m=k.match(/\d+/); return m?parseInt(m[0]):0; }
+function dayCard(k){
+  const d=DATA[k], on=selected.has(k)?"on":"";
+  const recentKeys=sortedKeys().slice(0,RECENT_DEFAULT);
+  const recent=recentKeys.includes(k)?'<span class="recent">최근</span>':'';
+  return `<div class="day ${on}" data-key="${k}">
+    <div class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#F7F3EA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><div class="name">${d.title}${recent}</div><div class="sub">${d.words.length}단어</div></div></div>`;
+}
+function sortedKeys(){ return Object.keys(DATA).sort((a,b)=>dayNum(b)-dayNum(a)); } // 최신이 위
+let oldOpen=false;
+function renderDays(){
+  const keys=sortedKeys();
+  selected=new Set(keys.slice(0,RECENT_DEFAULT)); // 최근 2개 체크
+  const recent=keys.slice(0,RECENT_VISIBLE), older=keys.slice(RECENT_VISIBLE);
+  $("days").innerHTML = recent.map(dayCard).join("");
+  $("daysOld").innerHTML = older.map(dayCard).join("");
+  oldOpen=false; $("daysOld").classList.add("hidden");
+  if(older.length){
+    $("moreDays").classList.remove("hidden");
+    $("moreDays").textContent = `이전 범위 더보기 (${older.length}개)`;
+  } else $("moreDays").classList.add("hidden");
+  bindDayClicks(); updateSetup(); requestAnimationFrame(updateFades);
+}
+function bindDayClicks(){
+  document.querySelectorAll("#days .day, #daysOld .day").forEach(el=>{
+    el.onclick=()=>{ const k=el.dataset.key;
+      selected.has(k)?selected.delete(k):selected.add(k); el.classList.toggle("on"); updateSetup(); };
+  });
+}
+$("moreDays").onclick=()=>{
+  oldOpen=!oldOpen;
+  $("daysOld").classList.toggle("hidden",!oldOpen);
+  const older=sortedKeys().slice(RECENT_VISIBLE);
+  $("moreDays").textContent = oldOpen ? "이전 범위 접기" : `이전 범위 더보기 (${older.length}개)`;
+  updateFades();
+};
+/* 스크롤 위치에 따라 위/아래 페이드 표시 (맨 위면 위 또렷, 맨 아래면 아래 또렷) */
+function updateFades(){
+  const el=$("scrollArea"); if(!el) return;
+  const top=el.scrollTop>2;
+  const bot=el.scrollTop < el.scrollHeight-el.clientHeight-2;
+  el.classList.toggle("fade-top",top);
+  el.classList.toggle("fade-bot",bot);
+}
+function updateSetup(){
+  const n=[...selected].reduce((s,k)=>s+DATA[k].words.length,0);
+  $("setupNote").textContent = selected.size===0?"범위를 하나 이상 선택하세요.":`${selected.size}개 범위 · 총 ${n}단어`;
+  $("start").disabled = selected.size===0;
+}
+$("audioSegs").querySelectorAll(".seg").forEach(s=>s.onclick=()=>{
+  $("audioSegs").querySelectorAll(".seg").forEach(x=>x.classList.remove("on")); s.classList.add("on"); audioMode=s.dataset.audio;
+});
+
+/* ---------- 덱 ---------- */
+function buildDeck(keys){
+  let d=[];
+  keys.forEach(k=>DATA[k].words.forEach(([en,ko])=>{
+    d.push({en,ko,day:k.replace("DAY ","D"),dir:Math.random()<0.5?"EK":"KE"});
+  }));
+  return shuffle(d);
+}
+function startQuiz(list,isReview){ deck=list; pos=0; wrong=[]; reviewing=isReview; show("quiz"); renderCard(); }
+function show(id){ ["setup","quiz","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); }
+
+/* ---------- 카드 ---------- */
+function renderCard(){
+  const c=deck[pos]; flipped=false;
+  $("card").classList.remove("flip");
+  $("grade").classList.add("hidden");
+  $("tapflip").style.visibility="visible";
+  const askEN = c.dir==="EK"; // 앞면 영어
+  $("fTag").textContent = askEN?"영어":"뜻";
+  $("bTag").textContent = askEN?"뜻":"영어";
+  // 앞면
+  if(askEN){ $("fWord").textContent=c.en; $("fWord").className="word"+(c.en.length>14?" small":""); }
+  else { $("fWord").innerHTML=posHtml(c.ko); $("fWord").className="word"+(c.ko.length>14?" small":""); }
+  // 뒷면
+  if(askEN){ $("bWord").innerHTML=posHtml(c.ko); $("bWord").className="word"+(c.ko.length>14?" small":""); }
+  else { $("bWord").textContent=c.en; $("bWord").className="word"+(c.en.length>14?" small":""); }
+  $("fDay").textContent=c.day; $("bDay").textContent=c.day;
+  // 스피커: 영어가 보이는 면에만
+  $("fSpk").classList.toggle("show", askEN);
+  $("bSpk").classList.toggle("show", !askEN);
+  $("prog").style.width=(pos/deck.length*100)+"%";
+  $("count").textContent=`${pos+1} / ${deck.length}`;
+  // 자동재생: 영어가 앞면이면 발음
+  if(audioMode==="auto" && askEN) setTimeout(()=>speak(c.en,$("fSpk")),250);
+}
+function flip(){
+  if(flipped) return; flipped=true;
+  $("card").classList.add("flip");
+  $("tapflip").style.visibility="hidden";
+  $("grade").classList.remove("hidden");
+  const c=deck[pos];
+  if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300); // 뒤집어 영어 나오면
+}
+$("card").onclick=flip;
+$("fSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("fSpk")); };
+$("bSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("bSpk")); };
+
+function grade(ok){ const c=deck[pos]; if(!ok) wrong.push(c); pos++; if(pos>=deck.length) finish(); else renderCard(); }
+$("gRight").onclick=()=>grade(true);
+$("gWrong").onclick=()=>grade(false);
+$("quit").onclick=()=>{ if(confirm("학습을 그만둘까요? 진행 상황은 저장되지 않습니다.")){ speechSynthesis.cancel(); renderDays(); show("setup"); } };
+
+/* ---------- 결과 ---------- */
+function finish(){
+  speechSynthesis.cancel();
+  const total=deck.length, w=wrong.length, r=total-w;
+  $("prog").style.width="100%";
+  $("score").textContent=Math.round(r/total*100)+"%";
+  $("scoreCap").textContent = w===0?"전부 맞혔어요 🎉":`${total}개 중 ${r}개 정답`;
+  $("rCnt").textContent=r; $("wCnt").textContent=w;
+  const has=w>0;
+  $("reviewArea").style.display=has?"block":"none";
+  $("redoWrong").style.display=has?"block":"none";
+  if(has) $("wlist").innerHTML=wrong.map(c=>`<li><span class="en">${c.en}</span><span class="ko">${posHtml(c.ko)}</span></li>`).join("");
+  show("result");
+}
+$("redoWrong").onclick=()=>startQuiz(shuffle(wrong.map(c=>({...c,dir:Math.random()<0.5?"EK":"KE"}))),true);
+$("again").onclick=()=>startQuiz(buildDeck([...selected]),false);
+$("reselect").onclick=()=>{ renderDays(); show("setup"); };
+$("start").onclick=()=>{ speak(" "); startQuiz(buildDeck([...selected]),false); }; // 첫 발화로 iOS 오디오 잠금 해제 시도
+
+renderDays();
+$("scrollArea").addEventListener("scroll", updateFades, {passive:true});
+window.addEventListener("resize", updateFades);
+</script>
+</body>
+</html>
