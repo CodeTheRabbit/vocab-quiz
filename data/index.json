@@ -1,6 +1,20 @@
 {
  "days": [
   {
+   "id": 12,
+   "file": "day12.json",
+   "title": "DAY 12  City & Traffic",
+   "subtitle": "City & Traffic",
+   "count": 30
+  },
+  {
+   "id": 11,
+   "file": "day11.json",
+   "title": "DAY 11  Jobs & Work",
+   "subtitle": "Jobs & Work",
+   "count": 30
+  },
+  {
    "id": 10,
    "file": "day10.json",
    "title": "DAY 10  School & Education",
