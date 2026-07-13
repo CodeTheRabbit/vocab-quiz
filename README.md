@@ -28,16 +28,18 @@
 3. 변경분 커밋·푸시. GitHub Pages에 반영되면 자녀 기기에서 새 DAY가 보인다.
    - "바로 반영"을 위해 앱의 데이터 fetch에 캐시 무효화가 있어야 함(명세 7절).
 
-### 모바일에서 추가할 때
-- Claude Code는 데스크탑. 폰에서 넣을 때는 **GitHub 모바일 웹에서 파일 커밋**(붙여넣기)으로 처리.
-- 즉석 시연만 필요하면 앱에 붙여넣기 입력(관리자용)을 두는 방안도 있음(선택).
+### 모바일에서 추가할 때 (확정 워크플로)
+1. 모바일 Claude 앱 대화에서 단어장 사진 판독·검증 → words.json 내용 생성.
+2. **Claude Code 웹**(claude.ai/code 또는 모바일 앱 Code 탭)에서 이 리포로 세션 열기.
+3. JSON을 프롬프트에 붙여넣고 지시: "words.json으로 저장하고 `python scripts/import_words.py words.json` 실행 후 커밋·푸시".
+   - 클라우드 세션에 파일 첨부는 안 됨 — 텍스트 붙여넣기가 표준. 샌드박스에 Python 내장.
+4. 웹 세션은 main 직접 push가 차단되어 **브랜치 push + PR 생성**까지 진행됨.
+5. GitHub 모바일(앱/웹)에서 **PR merge 1탭** → Pages 자동 재배포 → 자녀 기기 즉시 반영.
 
-## 다음 할 일 (Claude Code)
-`docs/IMPLEMENTATION_SPEC.md`를 기준으로 `index.html`을 구현한다.
-`docs/mockup.html`의 UX·스타일을 그대로 이식하되, 다음을 실제로 붙인다:
-- data/*.json **fetch**(현재 mockup은 데이터가 인라인) + 캐시 무효화
-- **localStorage** 저장(설정·오답·마지막 범위)
-- 실기기 발음/레이아웃 확인
+## 상태 (2026-07-14)
+`index.html` 구현 완료·배포됨 → https://codetherabbit.github.io/vocab-quiz/
+- data/*.json fetch + 캐시 무효화, localStorage(설정·누적 오답·마지막 범위), 오답 복습, 발음 속도 설정 포함
+- 확정된 설계 결정은 `docs/IMPLEMENTATION_SPEC.md` 6절·9절 참조
 
 ## 원칙 (지킬 것)
 - 백엔드·API 키 없음(정적·무료).
