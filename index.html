@@ -316,6 +316,34 @@ function speak(text, btn){
 }
 function cancelSpeak(){ if("speechSynthesis" in window) speechSynthesis.cancel(); }
 
+/* ===== 종소리 (한글 문제 출제 신호 · Web Audio, iOS·Windows 공통) ===== */
+let audioCtx=null;
+function ensureAudioCtx(){
+  if(audioCtx) return audioCtx;
+  try{ const AC = window.AudioContext||window.webkitAudioContext; if(AC) audioCtx=new AC(); }catch(e){ audioCtx=null; }
+  return audioCtx;
+}
+function unlockAudio(){ const c=ensureAudioCtx(); if(c && c.state==="suspended") c.resume(); } // iOS: 사용자 제스처에서 호출
+/* 짧고 청아한 작은 종소리 — 사인파 배음 + 빠른 감쇠 */
+function chime(){
+  const c=ensureAudioCtx(); if(!c) return;
+  if(c.state==="suspended") c.resume();
+  const t0=c.currentTime, master=c.createGain();
+  master.gain.value=0.13; master.connect(c.destination);
+  [{f:1568,g:1.0,d:0.85},   // G6 기음
+   {f:2349,g:0.45,d:0.6},   // 5도 위 배음
+   {f:3136,g:0.22,d:0.4}]   // 옥타브 배음
+  .forEach(({f,g,d})=>{
+    const o=c.createOscillator(), ga=c.createGain();
+    o.type="sine"; o.frequency.value=f;
+    ga.gain.setValueAtTime(0,t0);
+    ga.gain.linearRampToValueAtTime(g,t0+0.004);
+    ga.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+    o.connect(ga); ga.connect(master);
+    o.start(t0); o.stop(t0+d+0.05);
+  });
+}
+
 /* ===== 누적 오답 저장소 ===== */
 const wrongKey = w => w.en + "|" + w.day;
 /* 범위 학습 본 라운드에서 틀린 단어를 누적 (있으면 missCount+1) */
@@ -487,8 +515,8 @@ function renderCard(){
   $("bSpk").classList.toggle("show", !askEN);
   $("prog").style.width=(pos/deck.length*100)+"%";
   $("count").textContent=`${pos+1} / ${deck.length}`;
-  // 자동재생: 영어가 앞면이면 발음
-  if(audioMode==="auto" && askEN) setTimeout(()=>speak(c.en,$("fSpk")),250);
+  // 자동재생: 영어가 앞면이면 발음, 한글이 앞면이면 종소리로 출제 신호
+  if(audioMode==="auto"){ askEN ? setTimeout(()=>speak(c.en,$("fSpk")),250) : setTimeout(chime,250); }
 }
 function flip(){
   if(flipped) return; flipped=true;
@@ -543,7 +571,7 @@ $("start").onclick=async ()=>{
   LS.set(K_RANGE, [...selected]);
   try{
     const cards = await buildDeck([...selected]);
-    speak(" ");   // 첫 발화로 iOS 오디오 잠금 해제 시도
+    speak(" "); unlockAudio();   // iOS 오디오 잠금 해제 (발음·종소리)
     startQuiz(cards,"normal");
   }catch(e){
     $("setupNote").textContent="단어 데이터를 불러오지 못했어요. 네트워크 확인 후 다시 시도하세요.";
@@ -555,7 +583,7 @@ $("review").onclick=()=>{
   const list = LS.get(K_WRONG, []);
   if(!list.length) return;
   const cards = shuffle(list.map(w=>({en:w.en, ko:w.ko, dayId:w.day, dir:randDir()})));
-  speak(" ");
+  speak(" "); unlockAudio();
   startQuiz(cards,"review");
 };
 
