@@ -343,7 +343,7 @@ function chime(){
   const c=ensureAudioCtx(); if(!c) return;
   if(c.state==="suspended") c.resume();
   const t0=c.currentTime, master=c.createGain();
-  master.gain.value=0.13; master.connect(c.destination);
+  master.gain.value=0.3; master.connect(c.destination);
   [{f:1568,g:1.0,d:1.9},    // G6 기음 (긴 여운)
    {f:2349,g:0.45,d:1.3},   // 5도 위 배음
    {f:3136,g:0.22,d:0.8}]   // 옥타브 배음
