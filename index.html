@@ -634,7 +634,8 @@ $("start").onclick=async ()=>{
 $("paper").onclick=()=>{
   if(!selected.size) return;
   LS.set(K_RANGE, [...selected]);
-  location.href = "paper.html?days=" + [...selected].sort((a,b)=>a-b).join(",");
+  // v= 시각: GitHub Pages 가 max-age=600 을 보내므로 그냥 열면 옛 파일이 뜬다
+  location.href = "paper.html?days=" + [...selected].sort((a,b)=>a-b).join(",") + "&v=" + Date.now();
 };
 $("review").onclick=()=>{
   const list = LS.get(K_WRONG, []);

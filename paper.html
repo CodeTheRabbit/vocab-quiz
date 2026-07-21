@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- GitHub Pages 가 Cache-Control: max-age=600 을 보내 사파리가 10분간 옛 파일을 쓴다.
+     학습 화면의 「시험지 만들기」는 주소에 &v=시각 을 붙여 새로 받게 하고,
+     주소를 직접 열었을 때를 대비해 아래 메타와 화면의 버전 표기를 둔다. -->
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>단어 시험지</title>
 <style>
   /* ===== 인쇄 용지 ===== */
@@ -224,6 +228,9 @@ function applyOpts(rerender){
    - 내용은 13.4mm 에서 시작하고 사파리가 283.4mm 에서 쪽을 나눈다 → 쓸 수 있는 높이 270mm
    - 안전여유가 필요한 이유: 행은 쪼개지지 않으므로 1mm만 초과해도 한 행(약 8mm)이 통째로
      다음 장으로 밀린다. 기기별 확대율 편차까지 고려해 15mm 를 둔다. */
+/* 화면에 찍어두는 버전 — 기기가 옛 캐시를 쓰고 있는지 눈으로 바로 확인하려는 것.
+   인쇄 규칙(아래 상수·프리셋)을 고칠 때마다 함께 올린다. */
+const BUILD = "v4 (2026-07-21)";
 const IOS_SCALE  = 1.172;
 const IOS_USABLE = 270;
 const SAFETY_MM  = 15;
@@ -268,8 +275,8 @@ function measure(){
   const two  = sheets.flatMap(s=>[...s.querySelectorAll("tr")]).filter(r=>r.offsetHeight>base*1.5).length;
   const over = ios > limit;
   const el=$("fit");
-  el.textContent = `${sheets.length}장 · 두 줄 행 ${two}개 · 행 높이 ${rowH.toFixed(1)}mm(자동 맞춤) · `
-    + `예상 ${ios.toFixed(0)}/${limit}mm — `
+  el.textContent = `${BUILD} · ${sheets.length}장 · 두 줄 행 ${two}개 · `
+    + `행 높이 ${rowH.toFixed(1)}mm(자동 맞춤) · 예상 ${ios.toFixed(0)}/${limit}mm — `
     + (over||clamped ? "한 장을 넘길 수 있음" : "모두 한 장에 들어감");
   el.className = "fit " + (over||clamped ? "no" : "ok");
 }
