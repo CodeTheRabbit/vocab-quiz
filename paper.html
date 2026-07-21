@@ -8,18 +8,24 @@
   /* ===== 인쇄 용지 ===== */
   @page { size: A4 portrait; margin: 12mm; }
 
+  /* 인쇄 크기 프리셋 — JS가 :root 에 덮어쓴다. 기본은 '작게'(모바일 안전).
+     모바일 사파리는 페이지를 통째로 1.2배 안팎으로 확대해 인쇄하므로,
+     CSS 상 높이를 넉넉히 줄여둬야 종이 한 장에 들어간다. */
+  :root{ --fs:9pt; --pad:3pt; --hfs:12pt; --lfs:9pt; }
+
   *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%;}   /* iOS 글자 자동확대 차단 */
   body{margin:0; color:#000;
     font-family:'Noto Sans CJK KR','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 
-  /* ===== 시험지 본체 (화면·인쇄 공통 — 원본 PDF 사양 그대로) ===== */
+  /* ===== 시험지 본체 (화면·인쇄 공통) ===== */
   .sheet{background:#fff;}
   .hdr{display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:2pt solid #000; padding-bottom:3pt; margin-bottom:6pt;}
-  .hdr .t{font-size:13pt; font-weight:normal;}
-  .hdr .lab{font-size:10pt; font-weight:normal;}
+  .hdr .t{font-size:var(--hfs); font-weight:normal;}
+  .hdr .lab{font-size:var(--lfs); font-weight:normal;}
   table{border-collapse:collapse; width:100%; table-layout:fixed;}
-  th,td{border:0.8pt solid #000; font-size:10pt; padding:5.5pt 6pt; line-height:1.15;}
+  th,td{border:0.8pt solid #000; font-size:var(--fs); padding:var(--pad) 6pt; line-height:1.15;}
   th{background:#fff; font-weight:bold;}
   td.no,th.no{text-align:center; width:11mm;}
   td.en,th.en{text-align:center; width:44mm;}
@@ -39,6 +45,12 @@
     .btn.primary{background:#1B2A4A; color:#F7F3EA;}
     .btn.ghost{background:#F7F3EA; color:#6B6455; border:1.5px solid #D8D0C0;}
     .btn:disabled{opacity:.4; cursor:default;}
+    .miniseg{display:flex; background:#E7E1D3; border-radius:9px; padding:2.5px; gap:2px; flex:none;}
+    .miniseg button{border:none; background:transparent; border-radius:7px; padding:8px 13px;
+      font-size:12.5px; font-weight:800; color:#6B6455; font-family:inherit; cursor:pointer; white-space:nowrap;}
+    .miniseg button.on{background:#fff; color:#1B2A4A; box-shadow:0 1px 2px rgba(27,42,74,.15);}
+    .fit{font-size:11.5px; font-weight:700;}
+    .fit.ok{color:#237A5F;} .fit.no{color:#BE4E38;}
     #wrap{overflow-x:auto; padding:16px 0 40px;}
     .sheet{width:210mm; min-height:297mm; padding:12mm; margin:0 auto 14px;
       box-shadow:0 3px 14px rgba(0,0,0,.18);}
@@ -61,7 +73,14 @@
 <div class="bar noprint">
   <div class="grow">
     <div class="meta" id="meta">불러오는 중…</div>
-    <div class="tip">인쇄 대화상자에서 <b>용지 A4</b> · <b>머리글 및 바닥글 끄기</b>로 맞춰주세요.</div>
+    <div class="tip">
+      용지는 <b>A4</b>. 데스크톱이라면 인쇄 대화상자에서 <b>머리글 및 바닥글</b>도 꺼주세요.<br>
+      <span class="fit" id="fit"></span>
+    </div>
+  </div>
+  <div class="miniseg" id="sizeSeg">
+    <button data-size="mobile">모바일</button>
+    <button data-size="desktop">데스크톱</button>
   </div>
   <button class="btn ghost" id="back">← 학습</button>
   <button class="btn ghost" id="prev" hidden>직전 시험지</button>
@@ -79,6 +98,17 @@ const esc = s => String(s??"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">"
 const dayLabel = id => "DAY "+String(id).padStart(2,"0");
 const K_PAPER = "vq.paper";     // [최신, 직전] 최대 2벌
 const K_RANGE = "vq.lastRange"; // 학습 화면과 공유
+const K_SIZE  = "vq.paperSize"; // "mobile" | "desktop"
+/* 인쇄 크기 프리셋.
+   desktop = 원본 파이썬 도구(voca_pdf_tool.py) 사양 그대로. 내용 높이 약 265mm 로
+     A4 본문(273mm)에 3% 여유뿐 — 렌더러가 조금만 다르게 그려도 넘친다.
+   mobile  = 모바일 사파리가 페이지를 통째로 1.2배 안팎 확대해 인쇄하는 것을 흡수하도록
+     축소한 값. 종이에 찍히는 크기는 오히려 desktop 보다 커진다. */
+const SIZES = {
+  mobile : { fs:"9pt",  pad:"3pt",   hfs:"12pt", lfs:"9pt"  },
+  desktop: { fs:"10pt", pad:"5.5pt", hfs:"13pt", lfs:"10pt" },
+};
+const A4_BODY_MM = 273;         // A4 세로 297 - 상하 여백 12mm
 const LS = {
   get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -126,6 +156,27 @@ let ids = [];         // 출제할 DAY (오름차순)
 let hist = [];        // [최신, 직전]
 let viewing = 0;
 
+/* 인쇄 크기 적용 + '한 장에 들어가는지' 실측 표시 */
+let size = SIZES[LS.get(K_SIZE,"mobile")] ? LS.get(K_SIZE,"mobile") : "mobile";
+function applySize(){
+  const s=SIZES[size], r=document.documentElement.style;
+  r.setProperty("--fs",s.fs); r.setProperty("--pad",s.pad);
+  r.setProperty("--hfs",s.hfs); r.setProperty("--lfs",s.lfs);
+  $("sizeSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.size===size));
+  measure();
+}
+/* 첫 장의 실제 렌더 높이를 재서 A4 한 장에 들어가는지, 여유가 몇 %인지 보여준다.
+   모바일 사파리는 이 높이를 1.2배 안팎으로 키워 인쇄하므로 여유율이 곧 안전 마진이다. */
+function measure(){
+  const sh=document.querySelector(".sheet"); if(!sh) return;
+  const hdr=sh.querySelector(".hdr"), tbl=sh.querySelector("table");
+  const mm=(hdr.offsetHeight + parseFloat(getComputedStyle(hdr).marginBottom) + tbl.offsetHeight)*25.4/96;
+  const slack=(A4_BODY_MM-mm)/A4_BODY_MM*100;
+  const el=$("fit");
+  el.textContent = `내용 높이 ${mm.toFixed(0)}mm / A4 ${A4_BODY_MM}mm · 여유 ${slack.toFixed(0)}%`
+    + (slack>=20 ? " — 모바일 확대에도 안전" : slack>=10 ? " — 모바일에서 넘칠 수 있음" : " — 데스크톱 전용");
+  el.className = "fit " + (slack>=20 ? "ok" : "no");
+}
 function render(p){
   $("wrap").innerHTML = p.a.map(({id,t1,o2})=>{
     const d = dayData[id], w = d.words;
@@ -137,6 +188,7 @@ function render(p){
     + (viewing===1 ? "  (직전 시험지)" : "");
   $("prev").hidden = hist.length < 2;
   $("prev").textContent = viewing===1 ? "최신 시험지" : "직전 시험지";
+  measure();
 }
 function draw(){
   const p = { a: ids.map(id=>({id, ...buildAssign(dayData[id].words.length)})) };
@@ -173,6 +225,10 @@ async function start(){
   }
 }
 
+$("sizeSeg").querySelectorAll("button").forEach(b=>{
+  b.onclick=()=>{ size=b.dataset.size; LS.set(K_SIZE,size); applySize(); };
+});
+applySize();
 $("print").onclick  = ()=>window.print();
 $("redraw").onclick = draw;
 $("prev").onclick   = ()=>{ viewing = viewing===0 ? 1 : 0; render(hist[viewing]); };
