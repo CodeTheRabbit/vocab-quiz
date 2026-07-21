@@ -200,8 +200,16 @@ let ids = [];         // 출제할 DAY (오름차순)
 let hist = [];        // [최신, 직전]
 let viewing = 0;
 
+/* 기기 자동 판별 — 저장된 선택이 없을 때만 쓰는 초기값.
+   iPadOS 는 UA 를 맥으로 위장하므로 터치 지원 개수로 한 번 더 걸러낸다.
+   한 번이라도 버튼을 누르면 그 선택이 저장돼 자동 판별보다 우선한다. */
+const guessSize = () =>
+  ( /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.platform||""))
+    || matchMedia("(pointer: coarse)").matches ) ? "mobile" : "desktop";
+
 /* 크기·배치 적용 + '한 장에 들어가는지' 실측 표시 */
-let size   = ["mobile","desktop"].includes(LS.get(K_SIZE,""))   ? LS.get(K_SIZE)   : "mobile";
+let size   = ["mobile","desktop"].includes(LS.get(K_SIZE,""))   ? LS.get(K_SIZE)   : guessSize();
 let layout = ["one","two"].includes(LS.get(K_LAYOUT,""))        ? LS.get(K_LAYOUT) : "one";
 function applyOpts(rerender){
   document.documentElement.dataset.size = size;
@@ -209,13 +217,16 @@ function applyOpts(rerender){
   $("layoutSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.layout===layout));
   if(rerender && hist.length) render(hist[viewing]); else measure();
 }
-/* iOS 인쇄 실측 상수 (2026-07-21, 아이폰 사파리 · DAY 12 mobile/1단 출력물 측정)
-   - CSS 높이 197mm 가 인쇄물에서 218mm 로 나왔다 → 세로 확대율 약 1.105
-   - 내용은 13mm 에서 시작하고 사파리 바닥글이 285mm 에서 시작 → 쓸 수 있는 높이 272mm
-   확대율은 기기·화면에 따라 달라질 수 있으므로 여유 15mm 이상을 안전선으로 본다. */
-const IOS_SCALE  = 1.105;
-const IOS_USABLE = 272;
-const SAFETY_MM  = 12;          // 확대율이 기기마다 조금씩 다를 수 있어 남겨두는 마진
+/* iOS 인쇄 실측 상수 (2026-07-21, 아이폰 사파리 출력물 4종 측정)
+   - 확대율은 '지정한 글자 크기 vs 인쇄된 글자 크기'로 잰다. 표 높이로 재면 머리글 포함 여부에
+     따라 값이 흔들려 틀리기 쉽다(실제로 1.105 로 잘못 잡아 종이를 넘겼다).
+       1단 본문 9pt→10.55pt / 제목 12pt→14.07pt / 2단 본문 8.5pt→9.96pt  ⇒ 모두 1.172
+   - 내용은 13.4mm 에서 시작하고 사파리가 283.4mm 에서 쪽을 나눈다 → 쓸 수 있는 높이 270mm
+   - 안전여유가 필요한 이유: 행은 쪼개지지 않으므로 1mm만 초과해도 한 행(약 8mm)이 통째로
+     다음 장으로 밀린다. 기기별 확대율 편차까지 고려해 15mm 를 둔다. */
+const IOS_SCALE  = 1.172;
+const IOS_USABLE = 270;
+const SAFETY_MM  = 15;
 const PAD_MIN = 1.5, PAD_MAX = 8;   // 손글씨 칸이 너무 좁아지지도, 헐렁해지지도 않게
 
 const sheetMM = sh => {
