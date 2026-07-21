@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>종소리 후보 시청 · 단어 카드</title>
+<style>
+  :root{
+    --paper:#F3EFE7; --ink:#1B2A4A; --cream:#F7F3EA; --line:#D8D0C0;
+    --muted:#6B6455; --gold:#C9A24B; --right:#2E9E7B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;
+    background:var(--paper); color:var(--ink); display:flex; justify-content:center;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
+  .app{width:100%; max-width:520px; padding:20px 18px 40px;}
+  h1{font-size:19px; margin:6px 0 4px;}
+  .lead{font-size:13px; color:var(--muted); line-height:1.6; margin:0 0 18px;}
+  .lead b{color:var(--ink);}
+
+  .panel{background:var(--cream); border:1.5px solid var(--line); border-radius:14px; padding:15px; margin-bottom:16px;}
+  .panel h2{font-size:12px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; margin:0 0 10px;}
+  .row{display:flex; align-items:baseline; justify-content:space-between; font-size:13px; font-weight:700;}
+  .row b{font-size:17px; font-variant-numeric:tabular-nums;}
+  input[type=range]{width:100%; margin:12px 0 4px; accent-color:var(--ink);}
+  .hint{font-size:11.5px; color:var(--muted); line-height:1.6; margin:6px 0 0;}
+
+  .btn{display:block; width:100%; border:none; border-radius:11px; padding:13px;
+    font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; letter-spacing:.02em;}
+  .btn.primary{background:var(--ink); color:var(--cream);}
+  .btn.ghost{background:transparent; color:var(--muted); border:1.5px solid var(--line);}
+  .btn + .btn{margin-top:8px;}
+
+  .cand{background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:15px; margin-bottom:12px;}
+  .cand.on{border-color:var(--ink); box-shadow:0 4px 14px rgba(27,42,74,.10);}
+  .cand .nm{font-size:17px; font-weight:800;}
+  .cand .rec{font-size:10px; font-weight:800; letter-spacing:.05em; color:#fff; background:var(--right);
+    border-radius:99px; padding:3px 8px; margin-left:8px; vertical-align:2px;}
+  .cand .tagline{font-size:12px; color:var(--muted); font-weight:700; margin-top:2px;}
+  .cand .desc{font-size:11.5px; color:var(--muted); line-height:1.65; margin:9px 0 12px;}
+  .cand .btns{display:flex; gap:8px;}
+  .cand .btns .btn{margin-top:0; padding:11px 8px; font-size:13px;}
+
+  .pick{background:var(--ink); color:var(--cream); border-radius:14px; padding:16px; margin-top:18px;}
+  .pick .k{font-size:11.5px; opacity:.7; font-weight:700; letter-spacing:.05em;}
+  .pick .v{font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; margin-top:2px;}
+  .pick .hint{color:rgba(247,243,234,.65); margin-top:10px;}
+  :focus-visible{outline:2.5px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>종소리 후보 시청</h1>
+  <p class="lead">
+    한글 문제가 출제될 때 울리는 <b>신호음</b> 후보입니다.<br>
+    음량을 조절하면서 <b>영어 발음과 번갈아</b> 들어보고, 마음에 드는 후보와 음량을 알려주세요.
+    <br><span style="color:var(--muted)">※ 실제 앱과 같은 조건으로 듣기 위해 기기 볼륨은 평소 학습할 때 그대로 두세요.</span>
+  </p>
+
+  <div class="panel">
+    <h2>음량</h2>
+    <div class="row"><span>종소리 최대 진폭</span><b id="volVal">0.60</b></div>
+    <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6" aria-label="종소리 음량">
+    <p class="hint">
+      <b>1.00</b> = 영어 발음과 같은 최대 진폭 · <b>0.50</b> = 그 절반.<br>
+      단, 발음은 소리가 계속 이어지고 종소리는 순간에 사라지므로 <b>같은 숫자라도 종소리가 더 작게 느껴집니다.</b>
+      숫자를 맞추기보다 <b>귀로 비슷하다고 느껴지는 지점</b>을 찾아주세요.
+    </p>
+    <button id="tts" class="btn ghost" style="margin-top:12px;">🔊 영어 발음만 재생 (vocabulary)</button>
+    <button id="rep" class="btn ghost" disabled>🔁 마지막 후보 연속 5회 (3초 간격)</button>
+    <p class="hint">한 세션에서 이 소리가 <b>15번</b> 울립니다. 한 번 들어보고 고르지 마시고,
+      연속 재생으로 <b>다섯 번째에도 거슬리지 않는지</b> 꼭 확인해 주세요.</p>
+  </div>
+
+  <div id="cands"></div>
+
+  <div class="pick">
+    <div class="k">마지막으로 들은 후보</div>
+    <div class="v" id="lastPick">—</div>
+    <div class="k" style="margin-top:12px;">현재 음량</div>
+    <div class="v" id="lastVol">0.60</div>
+    <p class="hint">이 두 값을 그대로 알려주시면 <b>index.html</b>에 반영합니다.</p>
+  </div>
+</div>
+
+<script>
+/* ===== Web Audio 공통 ===== */
+let ctx=null;
+function AC(){
+  if(!ctx){ const A=window.AudioContext||window.webkitAudioContext; ctx = A ? new A() : null; }
+  if(ctx && ctx.state==="suspended") ctx.resume();
+  return ctx;
+}
+/* 한 번의 타격음. specs = [{r:배음비, g:상대게인, d:감쇠초}]
+   상대게인 합으로 나눠 정규화 → 후보가 달라도 '최대 진폭 = vol' 이 되어 음량 비교가 공정해진다. */
+function strike(f0, specs, vol, delay=0, type="sine"){
+  const c=AC(); if(!c) return;
+  const t0=c.currentTime+delay;
+  const sum=specs.reduce((s,p)=>s+p.g,0);
+  const master=c.createGain();
+  master.gain.value=vol/sum;
+  master.connect(c.destination);
+  specs.forEach(({r,g,d})=>{
+    const o=c.createOscillator(), ga=c.createGain();
+    o.type=type; o.frequency.value=f0*r;
+    ga.gain.setValueAtTime(0,t0);
+    ga.gain.linearRampToValueAtTime(g,t0+0.003);          // 3ms 타격 트랜지언트
+    ga.gain.exponentialRampToValueAtTime(0.0001,t0+d);    // 지수 감쇠
+    o.connect(ga); ga.connect(master);
+    o.start(t0); o.stop(t0+d+0.05);
+  });
+}
+
+/* ===== 후보 ===== */
+/* 종은 배음이 기음의 정수배가 아니다(2.0 / 2.4 / 3.0 / 4.2 …).
+   이 '비정수 배음'이 금속 울림의 정체이고, 정수배만 쓰면 플루트·비프음이 된다. */
+const CHIME = [{r:1,g:1,d:2.6},{r:2.0,g:0.55,d:1.8},{r:2.4,g:0.38,d:1.3},
+               {r:3.0,g:0.22,d:0.9},{r:4.2,g:0.13,d:0.6},{r:5.4,g:0.08,d:0.4}];  // A·E 공용 (긴 여운)
+const BELL  = [{r:1,g:1,d:1.6},{r:2.0,g:0.5,d:1.1},{r:2.4,g:0.3,d:0.8},{r:3.0,g:0.16,d:0.6}];
+const SHORT = [{r:1,g:1,d:1.1},{r:2.0,g:0.5,d:0.75},{r:2.4,g:0.3,d:0.5},{r:3.0,g:0.16,d:0.35}];
+const SPARK = [{r:1,g:1,d:0.7},{r:2.0,g:0.35,d:0.45},{r:3.0,g:0.15,d:0.3}];
+const TAP   = [{r:1,g:1,d:0.9},{r:2.0,g:0.6,d:0.6},{r:2.4,g:0.4,d:0.45},
+               {r:3.0,g:0.25,d:0.3},{r:4.2,g:0.15,d:0.2}];
+const longer = (arr,k) => arr.map(p=>({...p,d:p.d*k}));
+
+/* play(v, t) — t는 시작 지연(초). 「연속 5회」가 t만 바꿔 재사용한다.
+   음이 겹치는 후보는 개별 음량을 낮춰 합쳐진 최대 진폭이 v를 넘지 않게 한다. */
+const CANDS = [
+  { id:"A", nm:"띵~", tag:"싱글 · 여운 약 0.9초",
+    desc:"A5(880Hz) 한 번 타격. 비정수 배음 6개로 금속 울림을 만듭니다. 후보 중 H와 함께 가장 단순하고, 여운은 B 다음으로 깁니다.",
+    play:(v,t=0)=>strike(880,CHIME,v,t) },
+
+  { id:"E", nm:"띵~ (낮은 음)", tag:"싱글 · 여운 약 0.9초",
+    desc:"B의 첫 음 E5(659Hz)에 A와 똑같은 배음·여운을 입혔습니다. A보다 한 음 낮아 부드럽습니다. 여운 길이는 A와 같습니다.",
+    play:(v,t=0)=>strike(659.25,CHIME,v,t) },
+
+  { id:"H", nm:"딩!", tag:"싱글 · 여운 약 0.3초",
+    desc:"D6(1175Hz) 단타. A·E와 같은 종 음색이지만 여운이 3분의 1로 짧습니다. 가장 담백하고 반복돼도 방해가 적습니다. 신호만 필요하다면 이쪽.",
+    play:(v,t=0)=>strike(1174.66,TAP,v,t) },
+
+  { id:"F", nm:"딩동↑", rec:true, tag:"상승 2음 · 약 0.7초",
+    desc:"C5(523Hz) → G5(784Hz)로 올라가는 2음. B(띵동)를 뒤집은 소리입니다. 올라가는 음은 '시작·등장'을 뜻하는 신호로 널리 쓰여서, 새 문제가 떴다는 의미가 가장 직접적으로 전달됩니다.",
+    play:(v,t=0)=>{ strike(523.25,SHORT,v*0.75,t); strike(783.99,longer(SHORT,1.3),v*0.75,t+0.16); } },
+
+  { id:"G", nm:"반짝", rec:true, tag:"상승 3음 · 약 0.5초",
+    desc:"C6-E6-G6(1047·1319·1568Hz)를 0.07초 간격으로 빠르게 올려 치는 글로켄슈필풍 소리. 무언가 새로 나타났다는 느낌이 가장 강하고, 후보 중 두 번째로 짧아 반복에도 잘 견딥니다.",
+    play:(v,t=0)=>{ strike(1046.5,SPARK,v*0.55,t); strike(1318.5,SPARK,v*0.55,t+0.07);
+                    strike(1568,longer(SPARK,1.6),v*0.55,t+0.14); } },
+
+  { id:"B", nm:"띵동", tag:"하강 2음 · 약 1.1초 (가장 김)",
+    desc:"E5(659Hz) → C5(523Hz)로 내려가는 초인종 패턴. 알아채기는 쉽지만 내려가는 음은 '종료·닫힘' 쪽 신호이고, 초인종이라는 상징도 '누가 왔다'에 가까워 출제 신호로는 방향이 반대입니다.",
+    play:(v,t=0)=>{ strike(659.25,BELL,v*0.8,t); strike(523.25,longer(BELL,1.5),v*0.8,t+0.24); } },
+
+  { id:"D", nm:"현재음", tag:"배포본과 동일 (비교용)",
+    desc:"G6(1568Hz) + 정수배 배음 2개. 배음비가 1 : 1.5 : 2.0 정수비라 종보다 전자 비프음에 가깝습니다. 실제 배포본은 이 소리를 최대 진폭 0.5로 재생 중입니다.",
+    play:(v,t=0)=>strike(1568,[{r:1,g:1,d:1.9},{r:1.5,g:0.45,d:1.3},{r:2.0,g:0.22,d:0.8}],v,t) },
+];
+
+/* ===== 발음 (앱과 같은 조건: en-US, rate 0.5) ===== */
+function speak(text, after){
+  if(!("speechSynthesis" in window)){ if(after) after(); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="en-US"; u.rate=0.5;
+  const vs=speechSynthesis.getVoices();
+  const v=vs.find(x=>/en[-_]US/i.test(x.lang))||vs.find(x=>/^en/i.test(x.lang));
+  if(v) u.voice=v;
+  if(after) u.onend=u.onerror=()=>setTimeout(after,400);
+  speechSynthesis.speak(u);
+}
+
+/* ===== 화면 ===== */
+const $=id=>document.getElementById(id);
+const vol=()=>parseFloat($("vol").value);
+let lastCand = null;
+function setPick(c){
+  lastCand = c;
+  $("rep").disabled = false;
+  $("lastPick").textContent = `${c.id}. ${c.nm}`;
+  document.querySelectorAll(".cand").forEach(el=>el.classList.toggle("on", el.dataset.id===c.id));
+}
+$("cands").innerHTML = CANDS.map(c=>`
+  <div class="cand" data-id="${c.id}">
+    <div class="nm">${c.id}. ${c.nm}${c.rec?'<span class="rec">추천</span>':''}</div>
+    <div class="tagline">${c.tag}</div>
+    <p class="desc">${c.desc}</p>
+    <div class="btns">
+      <button class="btn primary" data-play="${c.id}">▶ 종소리</button>
+      <button class="btn ghost" data-ab="${c.id}">발음 → 종소리</button>
+    </div>
+  </div>`).join("");
+
+document.querySelectorAll("[data-play]").forEach(b=>{
+  b.onclick=()=>{ const c=CANDS.find(x=>x.id===b.dataset.play); setPick(c); c.play(vol()); };
+});
+document.querySelectorAll("[data-ab]").forEach(b=>{
+  b.onclick=()=>{ const c=CANDS.find(x=>x.id===b.dataset.ab); setPick(c); AC(); speak("vocabulary",()=>c.play(vol())); };
+});
+$("tts").onclick=()=>{ AC(); speak("vocabulary"); };
+/* 연속 5회 — Web Audio 스케줄러에 3초 간격으로 미리 예약(타이머 오차 없음) */
+$("rep").onclick=()=>{ if(!lastCand) return; AC();
+  for(let i=0;i<5;i++) lastCand.play(vol(), i*3); };
+$("vol").oninput=()=>{ const v=vol().toFixed(2); $("volVal").textContent=v; $("lastVol").textContent=v; };
+</script>
+</body>
+</html>

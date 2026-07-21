@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단어 시험지</title>
+<style>
+  /* ===== 인쇄 용지 ===== */
+  @page { size: A4 portrait; margin: 12mm; }
+
+  *{box-sizing:border-box;}
+  body{margin:0; color:#000;
+    font-family:'Noto Sans CJK KR','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+
+  /* ===== 시험지 본체 (화면·인쇄 공통 — 원본 PDF 사양 그대로) ===== */
+  .sheet{background:#fff;}
+  .hdr{display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:2pt solid #000; padding-bottom:3pt; margin-bottom:6pt;}
+  .hdr .t{font-size:13pt; font-weight:normal;}
+  .hdr .lab{font-size:10pt; font-weight:normal;}
+  table{border-collapse:collapse; width:100%; table-layout:fixed;}
+  th,td{border:0.8pt solid #000; font-size:10pt; padding:5.5pt 6pt; line-height:1.15;}
+  th{background:#fff; font-weight:bold;}
+  td.no,th.no{text-align:center; width:11mm;}
+  td.en,th.en{text-align:center; width:44mm;}
+  td.ko,th.ko{width:auto;}
+
+  /* ===== 화면 전용 ===== */
+  @media screen{
+    body{background:#EAE7E1;}
+    .bar{position:sticky; top:0; z-index:5; background:#F3EFE7; border-bottom:1.5px solid #D8D0C0;
+      padding:12px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+      font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;}
+    .bar .grow{flex:1 1 auto; min-width:120px;}
+    .meta{font-size:13px; font-weight:800; color:#1B2A4A;}
+    .tip{font-size:11.5px; color:#6B6455; line-height:1.5; margin-top:3px;}
+    .btn{border:none; border-radius:10px; padding:11px 15px; font-size:13.5px; font-weight:800;
+      font-family:inherit; cursor:pointer; letter-spacing:.02em; white-space:nowrap;}
+    .btn.primary{background:#1B2A4A; color:#F7F3EA;}
+    .btn.ghost{background:#F7F3EA; color:#6B6455; border:1.5px solid #D8D0C0;}
+    .btn:disabled{opacity:.4; cursor:default;}
+    #wrap{overflow-x:auto; padding:16px 0 40px;}
+    .sheet{width:210mm; min-height:297mm; padding:12mm; margin:0 auto 14px;
+      box-shadow:0 3px 14px rgba(0,0,0,.18);}
+    .msg{max-width:460px; margin:40px auto; padding:0 18px; text-align:center;
+      font-size:13.5px; color:#6B6455; line-height:1.7;
+      font-family:'Noto Sans KR',-apple-system,sans-serif;}
+  }
+
+  /* ===== 인쇄 전용 ===== */
+  @media print{
+    .bar,.noprint{display:none !important;}
+    #wrap{overflow:visible; padding:0;}
+    .sheet{width:auto; min-height:0; padding:0; margin:0; box-shadow:none;}
+    .sheet + .sheet{page-break-before:always; break-before:page;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bar noprint">
+  <div class="grow">
+    <div class="meta" id="meta">불러오는 중…</div>
+    <div class="tip">인쇄 대화상자에서 <b>용지 A4</b> · <b>머리글 및 바닥글 끄기</b>로 맞춰주세요.</div>
+  </div>
+  <button class="btn ghost" id="back">← 학습</button>
+  <button class="btn ghost" id="prev" hidden>직전 시험지</button>
+  <button class="btn ghost" id="redraw">새로 뽑기</button>
+  <button class="btn primary" id="print">인쇄 / PDF 저장</button>
+</div>
+
+<div id="wrap"><div class="msg" id="msg">시험지를 준비하는 중…</div></div>
+
+<script>
+/* ===== 공통 ===== */
+const $ = id => document.getElementById(id);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s??"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const dayLabel = id => "DAY "+String(id).padStart(2,"0");
+const K_PAPER = "vq.paper";     // [최신, 직전] 최대 2벌
+const K_RANGE = "vq.lastRange"; // 학습 화면과 공유
+const LS = {
+  get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+async function fetchJson(path){
+  const res = await fetch(`${path}?v=${Date.now()}`, {cache:"no-store"});
+  if(!res.ok) throw new Error(`${path} (${res.status})`);
+  return res.json();
+}
+
+/* ===== 배정 =====
+   원본 도구(voca_pdf_tool.build_assignment)와 동일한 규칙:
+   - 시험지1은 데이터 순서 그대로 두고 방향만 무작위 — 절반은 K(뜻 빈칸), 절반은 E(영어 빈칸)
+   - 시험지2는 같은 단어를 방향 반대로 뒤집고 행 순서도 새로 섞음
+   저장은 배정 결과(t1·o2)만 — 단어는 매번 data/*.json에서 다시 읽으므로 재현이 깨지지 않는다. */
+function buildAssign(n){
+  const idx = shuffle([...Array(n).keys()]);
+  const k = new Set(idx.slice(0, n>>1));                       // 홀수면 K가 1개 적음
+  const t1 = Array.from({length:n}, (_,i)=> k.has(i)?"K":"E").join("");
+  return { t1, o2: shuffle([...Array(n).keys()]) };
+}
+const flip = t => t==="K" ? "E" : "K";
+const rows1 = (w, t1)     => w.map((x,i)=>({en:x.en, ko:x.ko, type:t1[i]}));
+const rows2 = (w, t1, o2) => o2.map(j=>({en:w[j].en, ko:w[j].ko, type:flip(t1[j])}));
+
+/* ===== 렌더 ===== */
+function tableHtml(rows){
+  let h = "<tr><th class='no'>No</th><th class='en'>English</th><th class='ko'>뜻 (한글)</th></tr>";
+  rows.forEach((r,i)=>{
+    const k = r.type==="K";      // K = 뜻 빈칸(영어 제시)
+    h += `<tr><td class='no'>${i+1}</td><td class='en'>${k?esc(r.en):""}</td>`
+       + `<td class='ko'>${k?"":esc(r.ko)}</td></tr>`;
+  });
+  return `<table>${h}</table>`;
+}
+function sheetHtml(title, label, rows){
+  return `<section class="sheet"><div class="hdr">`
+       + `<span class="t">${esc(title)}</span><span class="lab">${esc(label)}</span>`
+       + `</div>${tableHtml(rows)}</section>`;
+}
+
+/* ===== 상태 ===== */
+const dayData = {};   // id → {title, words}
+let ids = [];         // 출제할 DAY (오름차순)
+let hist = [];        // [최신, 직전]
+let viewing = 0;
+
+function render(p){
+  $("wrap").innerHTML = p.a.map(({id,t1,o2})=>{
+    const d = dayData[id], w = d.words;
+    return sheetHtml(d.title, "시험지 1", rows1(w,t1))
+         + sheetHtml(d.title, "시험지 2 (순서·방향 변경)", rows2(w,t1,o2));
+  }).join("");
+  $("meta").textContent =
+    `${p.a.map(x=>dayLabel(x.id)).join(" · ")} — 총 ${p.a.length*2}장`
+    + (viewing===1 ? "  (직전 시험지)" : "");
+  $("prev").hidden = hist.length < 2;
+  $("prev").textContent = viewing===1 ? "최신 시험지" : "직전 시험지";
+}
+function draw(){
+  const p = { a: ids.map(id=>({id, ...buildAssign(dayData[id].words.length)})) };
+  hist = [p, ...hist].slice(0,2);   // 새 시험지가 최신, 직전 것은 한 벌만 보관
+  LS.set(K_PAPER, hist);
+  viewing = 0; render(p);
+}
+
+/* ===== 시작 ===== */
+async function start(){
+  try{
+    const all = ((await fetchJson("data/index.json")).days || []);
+    if(!all.length) throw new Error("등록된 범위 없음");
+    const q = new URLSearchParams(location.search).get("days");
+    const want = (q ? q.split(",").map(Number) : LS.get(K_RANGE, []))
+      .filter(id => all.some(d=>d.id===id));
+    ids = [...new Set(want.length ? want : [all[0].id])].sort((a,b)=>a-b);  // 오래된 DAY부터
+
+    await Promise.all(ids.map(async id=>{
+      const e = all.find(d=>d.id===id);
+      const j = await fetchJson("data/"+e.file);
+      dayData[id] = { title: e.title, words: j.words };
+    }));
+
+    // 저장된 이력 중 '같은 범위 + 형식이 온전한' 것만 직전 시험지로 이어받는다
+    const usable = p => p && Array.isArray(p.a) && p.a.length===ids.length
+      && p.a.every((x,i)=> x.id===ids[i] && typeof x.t1==="string" && Array.isArray(x.o2));
+    hist = (LS.get(K_PAPER, []) || []).filter(usable).slice(0,1);
+    draw();   // 새 시험지를 앞에 넣고 화면에 그린다
+  }catch(e){
+    $("wrap").innerHTML = `<div class="msg">시험지를 만들지 못했어요.<br>네트워크 확인 후 새로고침 해주세요.<br><br>${esc(e.message)}</div>`;
+    $("meta").textContent = "오류";
+    ["prev","redraw","print"].forEach(b=>$(b).disabled=true);
+  }
+}
+
+$("print").onclick  = ()=>window.print();
+$("redraw").onclick = draw;
+$("prev").onclick   = ()=>{ viewing = viewing===0 ? 1 : 0; render(hist[viewing]); };
+$("back").onclick   = ()=>location.href = "index.html";
+start();
+</script>
+</body>
+</html>

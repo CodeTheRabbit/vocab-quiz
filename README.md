@@ -6,16 +6,17 @@
 ## 폴더 구조
 ```
 .
-├─ index.html                  # 학습 웹앱 (Claude Code에서 mockup 기반으로 구현)
+├─ index.html                  # 학습 웹앱 (카드 학습·오답 복습)
+├─ paper.html                  # 인쇄용 지필 시험지 (DAY당 2장, 브라우저 인쇄로 PDF 저장)
 ├─ data/
 │  ├─ index.json               # DAY 목록(최신순) — 앱이 먼저 읽음
-│  ├─ day09.json               # DAY별 단어
-│  └─ day10.json
+│  └─ day09.json ~ day12.json  # DAY별 단어
 ├─ scripts/
 │  └─ import_words.py          # words.json → data/dayNN.json + index 재생성
 └─ docs/
    ├─ IMPLEMENTATION_SPEC.md   # 구현 명세 (먼저 읽을 것)
-   └─ mockup.html              # 확정된 UX 프로토타입 (시각/동작 기준)
+   ├─ mockup.html              # 확정된 UX 프로토타입 (시각/동작 기준)
+   └─ chime-lab.html           # 출제 종소리 후보 시청·음량 조정 도구
 ```
 
 ## 새 DAY 추가 워크플로
@@ -36,12 +37,16 @@
 4. 웹 세션은 main 직접 push가 차단되어 **브랜치 push + PR 생성**까지 진행됨.
 5. GitHub 모바일(앱/웹)에서 **PR merge 1탭** → Pages 자동 재배포 → 자녀 기기 즉시 반영.
 
-## 상태 (2026-07-14)
+## 상태 (2026-07-21)
 `index.html` 구현 완료·배포됨 → https://codetherabbit.github.io/vocab-quiz/
-- data/*.json fetch + 캐시 무효화, localStorage(설정·누적 오답·마지막 범위), 오답 복습, 발음 속도 설정 포함
-- 확정된 설계 결정은 `docs/IMPLEMENTATION_SPEC.md` 6절·9절 참조
+- data/*.json fetch + 캐시 무효화, localStorage(설정·누적 오답·마지막 범위·방향 이력), 오답 복습, 발음 속도 설정
+- **출제 신호음**: 한글 문제에 상승 3음 종소리('반짝'). 후보 비교는 `docs/chime-lab.html`
+- **출제 방향**: 세션 EK:KE 5:5 + 단어별 세션 간 교대(`vq.dirHist`)
+- **인쇄 시험지**: `paper.html` — DAY당 2장(시험지1·2), 브라우저 인쇄로 PDF 저장
+- 확정된 설계 결정은 `docs/IMPLEMENTATION_SPEC.md` 6절·9절·10절 참조
 
 ## 원칙 (지킬 것)
-- 백엔드·API 키 없음(정적·무료).
+- 백엔드·API 키 없음(정적·무료). 빌드 단계 없음, 외부 라이브러리 없음.
 - 판독은 앱 밖(대화 게이트)에서. 데이터엔 원자료 저장, 표기 변환은 표시 단계에서만.
-- 인쇄 시험지 파이프라인과 데이터 공유 — dayNN.json의 `ko`를 임의로 가공하지 말 것.
+- `dayNN.json`의 `ko`는 **원자료 그대로 보존** — 품사 박스·개행 같은 표기는 데이터에 굳히지 말 것.
+  표기 규칙이 바뀌어도 데이터를 다시 만들지 않기 위해서다.
