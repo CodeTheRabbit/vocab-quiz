@@ -1,5 +1,7 @@
 words.json
 words_raw.json
+reading.json
+docs/temp/
 *.pyc
 __pycache__/
 .DS_Store

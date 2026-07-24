@@ -13,7 +13,7 @@
 import sys, os, re, json, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "data")
+DATA = os.path.join(ROOT, "data", "vocabulary")
 
 def day_num(title):
     m = re.search(r'DAY\s*0*(\d+)', title, re.I)

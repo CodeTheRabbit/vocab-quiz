@@ -1,0 +1,315 @@
+{
+ "id": 7,
+ "title": "UNIT 07  Arts",
+ "subtitle": "Arts",
+ "passages": [
+  {
+   "id": 1,
+   "title": "Glass Harmonica",
+   "words": [
+    {
+     "en": "wineglass",
+     "ko": "명 와인잔"
+    },
+    {
+     "en": "rub",
+     "ko": "동 문지르다"
+    },
+    {
+     "en": "inspire",
+     "ko": "동 영감을 주다"
+    },
+    {
+     "en": "instrument",
+     "ko": "명 악기"
+    },
+    {
+     "en": "glass bowl",
+     "ko": "유리그릇"
+    },
+    {
+     "en": "various",
+     "ko": "형 다양한"
+    },
+    {
+     "en": "thickness",
+     "ko": "명 두께"
+    },
+    {
+     "en": "play",
+     "ko": "동 연주하다"
+    },
+    {
+     "en": "step",
+     "ko": "동 밟다"
+    },
+    {
+     "en": "rotate",
+     "ko": "동 회전하다"
+    },
+    {
+     "en": "touch",
+     "ko": "동 만지다"
+    },
+    {
+     "en": "edge",
+     "ko": "명 가장자리"
+    },
+    {
+     "en": "wet",
+     "ko": "형 젖은"
+    },
+    {
+     "en": "produce",
+     "ko": "동 만들다"
+    },
+    {
+     "en": "pure",
+     "ko": "형 깨끗한"
+    },
+    {
+     "en": "clear",
+     "ko": "형 맑은"
+    },
+    {
+     "en": "tone",
+     "ko": "명 음색"
+    },
+    {
+     "en": "magical",
+     "ko": "형 신비로운"
+    },
+    {
+     "en": "quite",
+     "ko": "부 꽤, 상당히"
+    },
+    {
+     "en": "popular",
+     "ko": "형 인기가 있는"
+    },
+    {
+     "en": "for a while",
+     "ko": "한동안"
+    },
+    {
+     "en": "composer",
+     "ko": "명 작곡가"
+    },
+    {
+     "en": "strange",
+     "ko": "형 이상한"
+    },
+    {
+     "en": "rumor",
+     "ko": "명 소문"
+    },
+    {
+     "en": "dizzy",
+     "ko": "형 어지러운"
+    },
+    {
+     "en": "faint",
+     "ko": "형 기절할 것 같은"
+    },
+    {
+     "en": "blame",
+     "ko": "동 ~을 탓하다; 명 탓"
+    },
+    {
+     "en": "performance",
+     "ko": "명 공연"
+    },
+    {
+     "en": "average",
+     "ko": "형 평균의; 명 평균"
+    },
+    {
+     "en": "life expectancy",
+     "ko": "기대 수명"
+    },
+    {
+     "en": "deadly",
+     "ko": "형 치명적인"
+    },
+    {
+     "en": "reveal",
+     "ko": "동 밝히다, 폭로하다"
+    },
+    {
+     "en": "fever",
+     "ko": "명 열병, 열"
+    },
+    {
+     "en": "overstimulate",
+     "ko": "동 과도하게 자극하다"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Salvador Dalí",
+   "words": [
+    {
+     "en": "uncomfortable",
+     "ko": "형 불편한"
+    },
+    {
+     "en": "symptom",
+     "ko": "명 증상"
+    },
+    {
+     "en": "temporary",
+     "ko": "형 일시적인"
+    },
+    {
+     "en": "personal",
+     "ko": "형 개인적인, 개인의"
+    },
+    {
+     "en": "satisfaction",
+     "ko": "명 만족(감)"
+    },
+    {
+     "en": "talent",
+     "ko": "명 재능"
+    },
+    {
+     "en": "ban",
+     "ko": "동 금지하다"
+    },
+    {
+     "en": "charming",
+     "ko": "형 매력적인"
+    },
+    {
+     "en": "spin",
+     "ko": "동 회전하다, 돌다"
+    },
+    {
+     "en": "artist",
+     "ko": "명 예술가"
+    },
+    {
+     "en": "artwork",
+     "ko": "명 예술 작품"
+    },
+    {
+     "en": "private",
+     "ko": "형 개인의"
+    },
+    {
+     "en": "collection",
+     "ko": "명 소장품"
+    },
+    {
+     "en": "museum",
+     "ko": "명 박물관"
+    },
+    {
+     "en": "surprisingly",
+     "ko": "부 놀랍게도"
+    },
+    {
+     "en": "easily",
+     "ko": "부 쉽게"
+    },
+    {
+     "en": "local",
+     "ko": "형 동네의, 지역의"
+    },
+    {
+     "en": "convenience store",
+     "ko": "편의점"
+    },
+    {
+     "en": "wrapper",
+     "ko": "명 포장지"
+    },
+    {
+     "en": "lollipop",
+     "ko": "명 막대사탕"
+    },
+    {
+     "en": "creator",
+     "ko": "명 제작자"
+    },
+    {
+     "en": "product",
+     "ko": "명 제품"
+    },
+    {
+     "en": "stand out",
+     "ko": "돋보이다"
+    },
+    {
+     "en": "decide",
+     "ko": "동 결정하다"
+    },
+    {
+     "en": "come up with",
+     "ko": "~을 만들어 내다, (해답·아이디어를) 내놓다"
+    },
+    {
+     "en": "simple",
+     "ko": "형 단순한"
+    },
+    {
+     "en": "insist",
+     "ko": "동 주장하다, 강조하다"
+    },
+    {
+     "en": "place",
+     "ko": "동 배치하다, 놓다"
+    },
+    {
+     "en": "visible",
+     "ko": "형 보이는"
+    },
+    {
+     "en": "consumer",
+     "ko": "명 소비자"
+    },
+    {
+     "en": "creation",
+     "ko": "명 제작, 창조"
+    },
+    {
+     "en": "remain",
+     "ko": "동 유지되다, 남아 있다"
+    },
+    {
+     "en": "pretty",
+     "ko": "부 거의, 상당히"
+    },
+    {
+     "en": "timeless",
+     "ko": "형 시대를 초월한"
+    },
+    {
+     "en": "modern",
+     "ko": "형 현대적인, 현대의"
+    },
+    {
+     "en": "attractive",
+     "ko": "형 매력적인"
+    },
+    {
+     "en": "delicious",
+     "ko": "형 맛있는"
+    },
+    {
+     "en": "origin",
+     "ko": "명 유래"
+    },
+    {
+     "en": "appealing",
+     "ko": "형 매력적인"
+    },
+    {
+     "en": "contain",
+     "ko": "동 담고 있다, 함유되어 있다"
+    }
+   ]
+  }
+ ]
+}

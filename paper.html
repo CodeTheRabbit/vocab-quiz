@@ -184,7 +184,10 @@ function sheetTwo(blocks, label){
 }
 const L1 = "시험지 1", L2 = "시험지 2 (순서·방향 변경)";
 /* 배치에 따라 시트 HTML 목록을 만든다.
-   2단에서 DAY 가 홀수로 남으면 그 DAY 만 1단으로 — 반쪽만 채운 장을 만들지 않기 위해서. */
+   - 1단: DAY 하나당 시험지1·2를 각각 한 장씩(총 2장).
+   - 2단: DAY 하나당 시험지1(좌)·시험지2(우)를 한 장에(총 1장). 시험지2는 시험지1의
+     정답면이므로 한 장에 두되 '잘라서/접어서 각각 배부'하는 운영으로 통제한다.
+     (30행 반쪽 열 구성은 기존 2단과 동일 — 한 장에 들어감이 실측으로 검증돼 있다.) */
 function buildSheets(p){
   const items = p.a.map(({id,t1,o2})=>{
     const d = dayData[id], w = d.words;
@@ -192,18 +195,10 @@ function buildSheets(p){
   });
   if(layout==="one")
     return items.flatMap(x=>[sheetOne(x.title,L1,x.r1), sheetOne(x.title,L2,x.r2)]);
-  const out=[];
-  for(let i=0;i<items.length;i+=2){
-    const pair = items.slice(i,i+2);
-    if(pair.length===2){
-      out.push(sheetTwo(pair.map(x=>({title:x.title, rows:x.r1})), L1));
-      out.push(sheetTwo(pair.map(x=>({title:x.title, rows:x.r2})), L2));
-    }else{
-      out.push(sheetOne(pair[0].title, L1, pair[0].r1));
-      out.push(sheetOne(pair[0].title, L2, pair[0].r2));
-    }
-  }
-  return out;
+  return items.map(x=> sheetTwo(
+    [{title:x.title+"  ·  시험지 1", rows:x.r1},
+     {title:x.title+"  ·  시험지 2 (순서·방향 변경)", rows:x.r2}],
+    "※ 시험지 2 = 정답면 · 잘라서/접어서 배부"));
 }
 
 /* ===== 상태 ===== */
@@ -308,7 +303,7 @@ function draw(){
 /* ===== 시작 ===== */
 async function start(){
   try{
-    const all = ((await fetchJson("data/index.json")).days || []);
+    const all = ((await fetchJson("data/vocabulary/index.json")).days || []);
     if(!all.length) throw new Error("등록된 범위 없음");
     const q = new URLSearchParams(location.search).get("days");
     const want = (q ? q.split(",").map(Number) : LS.get(K_RANGE, []))
@@ -317,7 +312,7 @@ async function start(){
 
     await Promise.all(ids.map(async id=>{
       const e = all.find(d=>d.id===id);
-      const j = await fetchJson("data/"+e.file);
+      const j = await fetchJson("data/vocabulary/"+e.file);
       dayData[id] = { title: e.title, words: j.words };
     }));
 

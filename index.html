@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>단어 카드</title>
+<title>영어 학습 · 단어/독해</title>
 <style>
   :root{
     --paper:#F3EFE7; --ink:#1B2A4A;
@@ -11,6 +11,7 @@
     --right:#2E9E7B; --right-d:#237A5F;
     --wrong:#E0674F; --wrong-d:#BE4E38;
     --muted:#6B6455; --gold:#C9A24B;
+    --read:#2E6E9E; --read-d:#20517A;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;height:100%;}
@@ -19,71 +20,87 @@
     background:var(--paper); color:var(--ink);
     display:flex; justify-content:center;
     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    transition:background .2s;
   }
+  /* Reading 섹션 쿨 종이톤 (배경으로 구역 구분). --ink 는 건드리지 않는다(글자색 유지) */
+  body.reading-mode{ --paper:#E7ECF2; --cream:#F3F6FB; --line:#D2DAE4; }
+
   .app{width:100%; max-width:460px; min-height:100dvh; display:flex; flex-direction:column; padding:18px 18px 24px;}
-  .top{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
-  .brand{font-size:15px; letter-spacing:.02em; font-weight:800;}
-  .brand small{font-weight:600; color:var(--muted); font-size:11px; margin-left:6px; letter-spacing:0;}
-  .screen{flex:1; display:flex; flex-direction:column;}
-  .setup-layout{min-height:0;}
-  .setup-head{flex:none;}
-  .setup-scroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; min-height:80px;
-    margin:0 -4px; padding:0 4px;
-    -webkit-mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 12px,#000 calc(100% - 12px),var(--mb,#000) 100%);
-    mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 12px,#000 calc(100% - 12px),var(--mb,#000) 100%);}
-  .setup-scroll.fade-top{--mt:transparent;}
-  .setup-scroll.fade-bot{--mb:transparent;}
-  .setup-foot{flex:none; padding-top:14px; border-top:1.5px solid var(--line); margin-top:8px;}
+  .screen{flex:1; display:flex; flex-direction:column; min-height:0;}
   .hidden{display:none !important;}
 
-  h2{font-size:13px; letter-spacing:.08em; color:var(--muted); font-weight:700; margin:6px 2px 10px; text-transform:uppercase;}
-  .days{display:flex; flex-direction:column; gap:9px;}
-  .day{display:flex; align-items:center; gap:12px; padding:14px 15px; background:var(--cream);
-    border:1.5px solid var(--line); border-radius:14px; cursor:pointer; transition:border-color .12s, background .12s;}
-  .day.on{border-color:var(--ink); background:#fff;}
-  .day .box{width:22px; height:22px; border-radius:7px; border:2px solid var(--line); flex:none;
-    display:flex; align-items:center; justify-content:center; transition:all .12s;}
-  .day.on .box{background:var(--ink); border-color:var(--ink);}
-  .day .box svg{width:13px; height:13px; opacity:0; transition:opacity .12s;}
-  .day.on .box svg{opacity:1;}
-  .day .name{font-weight:700; font-size:16px;}
-  .day .sub{color:var(--muted); font-size:12.5px; margin-top:2px;}
-  .day .recent{font-size:10px; color:var(--gold); font-weight:800; letter-spacing:.05em; margin-left:8px;}
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex:none; min-height:28px;}
+  .brand{font-size:15px; letter-spacing:.02em; font-weight:800;}
+  .brand small{font-weight:600; color:var(--muted); font-size:12px;}
+  .reading-mode .brand{color:var(--read-d);}
+  .navback{font-size:14px; color:var(--muted); font-weight:700; background:none; border:none; font-family:inherit; cursor:pointer; padding:4px 2px;}
+  .iconbtn{background:none; border:none; cursor:pointer; padding:4px; color:var(--muted); display:flex;}
+  .iconbtn svg{width:22px; height:22px;}
+  h2{font-size:13px; letter-spacing:.08em; color:var(--muted); font-weight:700; margin:2px 2px 10px; text-transform:uppercase;}
 
-  .setrow{margin:18px 0 4px;}
-  .setrow .lbl{font-size:13px; letter-spacing:.08em; color:var(--muted); font-weight:700; text-transform:uppercase; margin-bottom:9px; display:flex; align-items:center; gap:7px;}
-  .setrow .lbl svg{width:16px; height:16px;}
-  .segs{display:flex; gap:8px;}
-  .seg{flex:1; text-align:center; padding:11px 6px; border:1.5px solid var(--line); background:var(--cream);
-    border-radius:11px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer;}
-  .seg.on{border-color:var(--ink); background:#fff; color:var(--ink);}
+  /* ===== 홈 ===== */
+  .home{flex:1; display:flex; flex-direction:column; justify-content:center; gap:14px;}
+  .hcard{border:none; text-align:left; font-family:inherit; cursor:pointer;
+    border-radius:22px; padding:30px 24px; color:#fff; position:relative; overflow:hidden;
+    box-shadow:0 10px 24px rgba(27,42,74,.18); min-height:205px; display:flex; flex-direction:column; justify-content:center;}
+  .hcard.voca{background:linear-gradient(155deg,#22345C,#16233E);}
+  .hcard.read{background:linear-gradient(155deg,#2E6E9E,#20517A);}
+  .hcard .k{font-size:12px; font-weight:800; letter-spacing:.16em; opacity:.7; text-transform:uppercase;}
+  .hcard .t{font-size:41px; font-weight:800; margin:6px 0 0;}
+  .hcard .arrow{position:absolute; right:22px; bottom:22px; font-size:24px; opacity:.8;}
+  .hcard .ico{position:absolute; right:20px; top:20px; width:36px; height:36px; opacity:.3;}
+  .logo{flex:none; padding-top:14px; display:flex; justify-content:center;}
+  .logo img{width:96px; height:auto; opacity:.42;}
 
-  /* 설정 행 (레이블 좌 · 컨트롤 우) — iOS 설정 패턴 */
-  .optrow{display:flex; align-items:center; justify-content:space-between; padding:7px 2px; margin-bottom:4px;}
-  .optlbl{display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:var(--muted);}
-  .optlbl svg{width:16px; height:16px;}
-  /* iOS풍 토글 스위치 */
+  /* ===== 목록 (단어 DAY · 독해 UNIT/지문 공통) ===== */
+  .scrolllist{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    margin:0 -4px; padding:0 4px 2px;
+    -webkit-mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 14px,#000 calc(100% - 26px),var(--mb,#000) 100%);
+    mask-image:linear-gradient(180deg,var(--mt,#000) 0,#000 14px,#000 calc(100% - 26px),var(--mb,#000) 100%);}
+  .scrolllist.fade-top{--mt:transparent;} .scrolllist.fade-bot{--mb:transparent;}
+  .list{display:flex; flex-direction:column; gap:9px;}
+  .row{display:flex; align-items:center; gap:10px; width:100%; text-align:left; font-family:inherit; cursor:pointer;
+    padding:15px 15px; background:var(--cream); border:1.5px solid var(--line); border-radius:14px;
+    transition:border-color .12s, background .12s;}
+  .row:active{background:#fff;}
+  .row .rbody{flex:1; min-width:0;}
+  .row .rname{font-weight:700; font-size:16px;}
+  .row .rname small{font-weight:600; color:var(--muted); font-size:12.5px; margin-left:7px;}
+  .row .rsub{color:var(--muted); font-size:12.5px; margin-top:2px;}
+  .row .recent{font-size:10px; color:var(--gold); font-weight:800; letter-spacing:.05em; margin-left:8px;}
+  .chev{font-size:20px; font-weight:800; flex:none; color:var(--ink);}
+  .reading-mode .chev{color:var(--read);}
+
+  .foot{flex:none; padding-top:12px; display:flex; flex-direction:column; gap:9px;}
+  .reviewrow{display:flex; align-items:center; gap:8px; width:100%; font-family:inherit; cursor:pointer;
+    padding:14px 15px; border:1.5px solid #EED4C9; background:#FBEFEA; border-radius:13px;}
+  .reviewrow .t{flex:1; text-align:left; font-size:13.5px; font-weight:700; color:var(--wrong-d);}
+  .reviewrow .t b{font-weight:800;}
+  .reviewrow .chev{color:var(--wrong-d); font-size:18px;}
+  .paperrow{display:flex; align-items:center; gap:9px; width:100%; font-family:inherit; cursor:pointer;
+    padding:13px 15px; border:1.5px dashed var(--line); background:transparent; border-radius:13px;
+    color:var(--muted); font-weight:700; font-size:13.5px;}
+  .paperrow svg{width:18px; height:18px;}
+  .paperrow .chev{margin-left:auto; font-size:18px; color:var(--muted);}
+  .note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5;}
+
+  /* ===== 설정 ===== */
+  .setrow{margin-top:6px;}
+  .optrow{display:flex; align-items:center; justify-content:space-between; padding:10px 2px;}
+  .optlbl{display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; color:var(--muted);}
+  .optlbl svg{width:18px; height:18px;}
   .switch{width:46px; height:27px; border-radius:99px; background:var(--line); position:relative; cursor:pointer; transition:background .18s; flex:none;}
   .switch i{position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:left .18s;}
-  .switch.on{background:var(--right);}
-  .switch.on i{left:22px;}
-  /* 미니 세그먼트 컨트롤 */
+  .switch.on{background:var(--right);} .switch.on i{left:22px;}
   .miniseg{display:flex; background:#E7E1D3; border-radius:9px; padding:2.5px; gap:2px;}
-  .miniseg .seg{flex:none; padding:5px 14px; border:none; background:transparent; border-radius:7px; font-size:12.5px; font-weight:700; color:var(--muted);}
-  .miniseg .seg.on{background:#fff; color:var(--ink); border:none; box-shadow:0 1px 2px rgba(27,42,74,.15);}
+  .miniseg .seg{flex:none; padding:6px 15px; border:none; background:transparent; border-radius:7px; font-size:12.5px; font-weight:700; color:var(--muted); font-family:inherit; cursor:pointer;}
+  .miniseg .seg.on{background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(27,42,74,.15);}
 
-  .spacer{flex:1;}
-  .btn{width:100%; border:none; border-radius:14px; padding:17px; font-size:16px; font-weight:800;
-    font-family:inherit; cursor:pointer; letter-spacing:.02em;}
-  .btn.primary{background:var(--ink); color:var(--cream);}
-  .btn:disabled{opacity:.4;}
-  .btn.ghost{background:transparent; color:var(--muted); border:1.5px solid var(--line);}
-  .btn-row{display:flex; gap:10px;} .btn-row .btn{margin-top:0;}
-  .note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:12px; line-height:1.5;}
-
-  .qbar{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  /* ===== 퀴즈 ===== */
+  .qbar{display:flex; align-items:center; gap:12px; margin-bottom:16px; flex:none;}
   .prog{flex:1; height:7px; background:var(--line); border-radius:99px; overflow:hidden;}
   .prog i{display:block; height:100%; background:var(--ink); width:0; transition:width .25s ease;}
+  .reading-mode .prog i{background:var(--read);}
   .count{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:700;}
   .quit{font-size:12.5px; color:var(--muted); background:none; border:none; font-family:inherit; cursor:pointer; padding:4px;}
 
@@ -101,31 +118,38 @@
   .front .tag{background:rgba(247,243,234,.14); color:var(--cream);}
   .back{background:var(--cream); color:var(--ink); transform:rotateY(180deg); border:2px solid var(--ink);}
   .back .tag{background:var(--ink); color:var(--cream);}
+  .reading-mode .front{background:linear-gradient(160deg,#2E6E9E,#20517A);}
+  .reading-mode .back{border-color:var(--read);}
+  .reading-mode .back .tag{background:var(--read);}
   .word{font-size:42px; font-weight:800; line-height:1.25; word-break:keep-all;}
   .word.small{font-size:30px;}
-  .word .sense{display:block;}
-  .word .sense + .sense{margin-top:.35em;}
+  .word .sense{display:block;} .word .sense + .sense{margin-top:.35em;}
   .daylabel{position:absolute; top:18px; right:18px; font-size:11px; opacity:.5; font-weight:700;}
-  /* speaker button on card */
   .spk{position:absolute; bottom:16px; right:16px; width:46px; height:46px; border-radius:50%;
     border:none; cursor:pointer; display:none; align-items:center; justify-content:center;
     background:rgba(247,243,234,.16); transition:transform .1s;}
-  .back .spk{background:var(--ink);}
-  .spk:active{transform:scale(.9);}
-  .spk.show{display:flex;}
+  .back .spk{background:var(--ink);} .reading-mode .back .spk{background:var(--read);}
+  .spk:active{transform:scale(.9);} .spk.show{display:flex;}
   .spk svg{width:22px; height:22px;}
   .front .spk svg{stroke:var(--cream);} .back .spk svg{stroke:var(--cream);}
   .spk.playing{animation:pulse .6s ease infinite;}
   @keyframes pulse{50%{transform:scale(1.12);}}
-  /* POS box */
   .pos{display:inline-flex; align-items:center; justify-content:center; min-width:1.5em; height:1.5em;
     padding:0 .25em; margin-right:.3em; border:1.6px solid currentColor; border-radius:5px;
     font-size:.62em; font-weight:800; vertical-align:.12em; opacity:.85; line-height:1;}
 
-  .grade{display:flex; gap:10px; margin-top:18px;} .grade .btn{margin-top:0;}
+  .grade{display:flex; gap:10px; margin-top:18px; flex:none;}
+  .btn{width:100%; border:none; border-radius:14px; padding:17px; font-size:16px; font-weight:800;
+    font-family:inherit; cursor:pointer; letter-spacing:.02em;}
+  .btn:disabled{opacity:.4;}
+  .btn.primary{background:var(--ink); color:var(--cream);}
+  .reading-mode .btn.primary{background:var(--read);}
+  .btn.ghost{background:transparent; color:var(--muted); border:1.5px solid var(--line);}
   .btn.wrong{background:var(--wrong); color:#fff;} .btn.right{background:var(--right); color:#fff;}
-  .tapflip{text-align:center; color:var(--muted); font-size:13px; font-weight:600; margin-top:18px; height:20px;}
+  .btn-row{display:flex; gap:10px;} .btn-row .btn{margin-top:0;}
+  .tapflip{text-align:center; color:var(--muted); font-size:13px; font-weight:600; margin-top:18px; height:20px; flex:none;}
 
+  /* ===== 결과 ===== */
   .result{flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;}
   .result .big{font-size:52px; font-weight:800; letter-spacing:-.02em;}
   .result .cap{color:var(--muted); font-size:14px; font-weight:600; margin-top:2px;}
@@ -139,36 +163,41 @@
   .wlist li{display:flex; justify-content:space-between; gap:14px; padding:11px 4px; border-bottom:1px solid var(--line); text-align:left; align-items:baseline;}
   .wlist .en{font-weight:700;} .wlist .ko{color:var(--muted); font-size:13.5px; text-align:right;}
 
-  /* 키보드 포커스 가시성 */
   :focus-visible{outline:2.5px solid var(--gold); outline-offset:2px;}
-  /* 동작 줄이기 설정 존중 (카드 플립 완화) */
   @media (prefers-reduced-motion: reduce){
-    .card{transition:none;}
-    .prog i{transition:none;}
-    .spk.playing{animation:none;}
+    .card{transition:none;} .prog i{transition:none;} .spk.playing{animation:none;}
     .switch, .switch i{transition:none;}
   }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top">
-    <div class="brand">단어 카드</div>
-    <div class="brand"><small id="hdRange"></small></div>
-  </div>
 
-  <!-- SETUP -->
-  <section id="setup" class="screen setup-layout">
-    <div class="setup-head">
-      <h2>범위 선택 · 최신이 위</h2>
+  <!-- ===== 홈 ===== -->
+  <section id="home" class="screen">
+    <div class="top">
+      <div class="brand">영어 학습</div>
+      <button class="iconbtn" id="toSettings" aria-label="설정">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
     </div>
-    <div class="setup-scroll" id="scrollArea">
-      <div id="days" class="days"></div>
-      <div id="daysOld" class="days hidden" style="margin-top:9px;"></div>
-      <button id="moreDays" class="btn ghost hidden" style="margin-top:10px; padding:12px; font-size:13px;"></button>
-      <button id="retryIdx" class="btn ghost hidden" style="margin-top:10px; padding:12px; font-size:13px;">다시 시도</button>
+    <div class="home">
+      <button class="hcard voca" id="goVoca">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16"/></svg>
+        <div class="k">Vocabulary</div><div class="t">단어</div><div class="arrow">→</div>
+      </button>
+      <button class="hcard read" id="goReading">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M12 5v14"/></svg>
+        <div class="k">Reading</div><div class="t">독해</div><div class="arrow">→</div>
+      </button>
     </div>
-    <div class="setup-foot">
+    <div class="logo"><img src="assets/codetherabbit-logo.svg" alt="codetherabbit"></div>
+  </section>
+
+  <!-- ===== 설정 ===== -->
+  <section id="settings" class="screen hidden">
+    <div class="top"><button class="navback" id="setBack">← 홈</button><div class="brand">설정</div><span style="width:40px"></span></div>
+    <div class="setrow">
       <div class="optrow">
         <div class="optlbl">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
@@ -186,14 +215,49 @@
           <div class="seg" data-rate="normal" role="radio" tabindex="0">보통</div>
         </div>
       </div>
-      <p class="note" id="setupNote" style="margin-top:0; margin-bottom:10px;"></p>
-      <button id="review" class="btn ghost hidden" style="margin-bottom:10px; padding:13px; font-size:14px;"></button>
-      <button id="paper" class="btn ghost" style="margin-bottom:10px; padding:13px; font-size:14px;" disabled>시험지 만들기 (인쇄용)</button>
-      <button id="start" class="btn primary" disabled>학습 시작</button>
+      <p class="note" style="text-align:left; margin-top:14px;">영어만 발음합니다. 자동발음을 켜면 영어가 보이는 면에서 자동으로 소리가 납니다.</p>
     </div>
   </section>
 
-  <!-- QUIZ -->
+  <!-- ===== 단어: DAY 목록 ===== -->
+  <section id="vsetup" class="screen hidden">
+    <div class="top"><button class="navback" data-home>← 홈</button><div class="brand">단어</div>
+      <button class="iconbtn" id="vPaper" aria-label="시험지 만들기" title="시험지 만들기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      </button></div>
+    <h2>DAY 선택 · 최신이 위</h2>
+    <div class="scrolllist" id="vScroll"><div class="list" id="vdays"></div></div>
+    <div class="foot">
+      <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span></button>
+    </div>
+  </section>
+
+  <!-- ===== 단어: 시험지 DAY 고르기 ===== -->
+  <section id="vpaper" class="screen hidden">
+    <div class="top"><button class="navback" id="paperBack">← 단어</button><div class="brand"><small>시험지 만들기</small></div><span style="width:40px"></span></div>
+    <h2>DAY 선택 · 시험지</h2>
+    <div class="scrolllist" id="pScroll"><div class="list" id="paperDays"></div></div>
+    <p class="note">DAY를 누르면 인쇄용 시험지가 열립니다</p>
+  </section>
+
+  <!-- ===== 독해: UNIT 목록 ===== -->
+  <section id="runits" class="screen hidden">
+    <div class="top"><button class="navback" data-home>← 홈</button><div class="brand">독해</div><span style="width:40px"></span></div>
+    <h2>UNIT 선택 · 최신이 위</h2>
+    <div class="scrolllist" id="uScroll"><div class="list" id="units"></div></div>
+  </section>
+
+  <!-- ===== 독해: 지문 목록 ===== -->
+  <section id="rpassages" class="screen hidden">
+    <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand"><small id="rpTitle"></small></div><span style="width:40px"></span></div>
+    <h2 id="rpH2">지문 선택</h2>
+    <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
+    <div class="foot">
+      <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
+    </div>
+  </section>
+
+  <!-- ===== 퀴즈 ===== -->
   <section id="quiz" class="screen hidden">
     <div class="qbar">
       <button class="quit" id="quit">← 그만</button>
@@ -229,7 +293,7 @@
     </div>
   </section>
 
-  <!-- RESULT -->
+  <!-- ===== 결과 ===== -->
   <section id="result" class="screen hidden">
     <div class="result">
       <div class="big" id="score">0%</div>
@@ -243,7 +307,7 @@
         <ul class="wlist" id="wlist"></ul>
       </div>
     </div>
-    <div class="spacer"></div>
+    <div style="flex:1"></div>
     <button id="redoWrong" class="btn primary">틀린 것만 다시 (맞출 때까지)</button>
     <div class="btn-row" style="margin-top:10px;">
       <button id="again" class="btn ghost">처음부터</button>
@@ -254,23 +318,19 @@
 
 <script>
 /* ===== 조정 가능한 설정값 ===== */
-const RECENT_VISIBLE = 2;   // 목록에 처음부터 보이는 DAY 수 (나머지는 '더보기')
-const RECENT_DEFAULT = 2;   // 기본 체크되는 DAY 수
-const SPEECH_RATES   = { slow:0.3, normal:0.5 }; // 발음 속도 프리셋 (1=원래 속도)
-const CHIME_VOL      = 0.8;  // 출제 종소리 음량 — docs/chime-lab.html 슬라이더 값과 동일 (실제 최대 진폭 ≈ 0.81 × 이 값)
+const SPEECH_RATES = { slow:0.3, normal:0.5 };
+const CHIME_VOL    = 0.8;
 
-/* ===== localStorage (기기별 저장) ===== */
-const K_SETTINGS = "vq.settings";   // {autoplay:true}
-const K_WRONG    = "vq.wrong";      // [{en,ko,day,missCount,lastSeen}] 누적 오답
-const K_RANGE    = "vq.lastRange";  // [id,...] 마지막 선택 범위
-const K_DIRH     = "vq.dirHist";    // {"en|dayId": "EK"|"KE"} 단어별 직전 출제 방향
+/* ===== localStorage ===== */
+const K_SETTINGS = "vq.settings";        // {autoplay, rate} — 단어·독해 공통
+const K_WRONG    = "vq.wrong";           // 단어 오답 [{en,ko,day,missCount,lastSeen}]
+const K_DIRH     = "vq.dirHist";         // 단어 방향 이력 {"en|dayId":"EK"|"KE"}
+const K_RWRONG   = "vq.reading.wrong";   // 독해 오답 [{en,ko,unit,passage,missCount,lastSeen}]
 const LS = {
-  get(k, fb){ try{ const v = localStorage.getItem(k); return v==null ? fb : JSON.parse(v); }catch(e){ return fb; } },
+  get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
 const today = () => { const d=new Date(), p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
-
-/* ===== 데이터 fetch (캐시 무효화: 버전 쿼리) ===== */
 async function fetchJson(path){
   const res = await fetch(`${path}?v=${Date.now()}`, {cache:"no-store"});
   if(!res.ok) throw new Error(`${path} 로드 실패 (${res.status})`);
@@ -278,48 +338,95 @@ async function fetchJson(path){
 }
 
 /* ===== 상태 ===== */
-let daysIndex = [];           // index.json의 days (최신이 위 — 순서 신뢰)
-const dayCache = {};          // id → words[] (세션 내 재사용)
-let selected = new Set();     // 선택된 DAY id
-const _settings = LS.get(K_SETTINGS, {});
-let audioMode = _settings.autoplay===false ? "off" : "auto";
-let speechRate = SPEECH_RATES[_settings.rate] ? _settings.rate : "normal"; // 기본: 보통
+let daysIndex = [], dayCache = {};       // 단어
+let unitsIndex = [], unitCache = {};     // 독해 (unitCache[id] = {id,title,passages:[{id,title,words}]})
+let curUnitId = null;
+const _s = LS.get(K_SETTINGS, {});
+let audioMode  = _s.autoplay===false ? "off" : "auto";
+let speechRate = SPEECH_RATES[_s.rate] ? _s.rate : "normal";
 const saveSettings = () => LS.set(K_SETTINGS, {autoplay: audioMode==="auto", rate: speechRate});
-let deck=[], pos=0, flipped=false, wrong=[];
-let sessKind="normal";        // normal(범위 학습) | review(누적 오답 복습)
-let round=0;                  // 0=본 라운드, 1+=틀린 것만 반복 라운드
+
+let sess = null;   // {section:'voca'|'reading', mode:'normal'|'review', ordered, dayId, unitId, passageId, label}
+let deck=[], pos=0, flipped=false, wrong=[], round=0;
 
 const $ = id => document.getElementById(id);
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
-const dayLabel = id => "D"+String(id).padStart(2,"0");
+const pad2 = n => String(n).padStart(2,"0");
 const dirKey  = c => c.en + "|" + c.dayId;
 const opposite = d => d==="EK" ? "KE" : "EK";
-/* 방향 배정 — 두 가지를 동시에 만족시킨다.
-   (1) 단어별 교대: 직전 세션에 EK로 나온 단어는 이번엔 KE로. 한쪽 방향에만 계속
-       노출되면 '뜻 알아보기'와 '영어 써내기' 중 한쪽만 늘기 때문.
-   (2) 세션 5:5: 그래도 한 세션의 EK/KE 개수는 절반씩(홀수면 ±1) 맞춘다.
-   (1)만으로는 균형이 깨지므로, 모자란 쪽을 이력 없는 카드부터 채우고
-   그래도 안 맞으면 무작위로 골라 뒤집는다. */
+
+/* 뜻 렌더: 품사 박스 + 세미콜론 개행 (원자료 ko 를 표시 단계에서만 가공) */
+function posHtml(ko){
+  const boxed = ko.replace(/(^|;\s*)(명|동|형|부|전|접|대|감|조|관|수)(?=\s)/g,
+    (m,pre,p)=> pre + '<span class="pos">'+p+'</span>').replace(/\s+(?=<span class="pos")/g,' ');
+  return boxed.split(/\s*;\s*/).map(s=>s.trim()).filter(Boolean)
+    .map(s=>`<span class="sense">${s}</span>`).join("");
+}
+
+/* ===== 발음 (영어만) ===== */
+let enVoice=null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  enVoice = vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, btn){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang="en-US"; u.rate=SPEECH_RATES[speechRate]; if(enVoice) u.voice=enVoice;
+  if(btn){ u.onstart=()=>btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
+  speechSynthesis.speak(u);
+}
+function cancelSpeak(){ if("speechSynthesis" in window) speechSynthesis.cancel(); }
+
+/* ===== 종소리 (단어 한글 문제 출제 신호) ===== */
+let audioCtx=null;
+function ensureAudioCtx(){
+  if(audioCtx) return audioCtx;
+  try{ const AC=window.AudioContext||window.webkitAudioContext; if(AC) audioCtx=new AC(); }catch(e){ audioCtx=null; }
+  return audioCtx;
+}
+function unlockAudio(){ const c=ensureAudioCtx(); if(c && c.state==="suspended") c.resume(); }
+function strike(f0, specs, vol, delay){
+  const c=ensureAudioCtx(); if(!c) return;
+  if(c.state==="suspended") c.resume();
+  const t0=c.currentTime+delay, sum=specs.reduce((s,p)=>s+p.g,0);
+  const master=c.createGain(); master.gain.value=vol/sum; master.connect(c.destination);
+  specs.forEach(({r,g,d})=>{
+    const o=c.createOscillator(), ga=c.createGain();
+    o.type="sine"; o.frequency.value=f0*r;
+    ga.gain.setValueAtTime(0,t0);
+    ga.gain.linearRampToValueAtTime(g,t0+0.003);
+    ga.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+    o.connect(ga); ga.connect(master); o.start(t0); o.stop(t0+d+0.05);
+  });
+}
+const SPARK = [{r:1,g:1,d:0.7},{r:2.0,g:0.35,d:0.45},{r:3.0,g:0.15,d:0.3}];
+function chime(){
+  const v = CHIME_VOL*0.55;
+  strike(1046.5, SPARK, v, 0);
+  strike(1318.5, SPARK, v, 0.07);
+  strike(1568,   SPARK.map(p=>({...p,d:p.d*1.6})), v, 0.14);
+}
+
+/* ===== 방향 배정 (단어 전용) ===== */
 function assignDirs(cards){
   const n=cards.length, hist=LS.get(K_DIRH, {});
   const dirs = cards.map(c=>{ const p=hist[dirKey(c)]; return p ? opposite(p) : null; });
   const targetEK = (n>>1) + ((n&1) && Math.random()<0.5 ? 1 : 0);
   let ek = dirs.filter(d=>d==="EK").length;
-  // 이력 없는 카드로 먼저 균형을 맞춘다
   for(const i of shuffle(dirs.map((d,i)=>d===null?i:-1).filter(i=>i>=0))){
     if(ek < targetEK){ dirs[i]="EK"; ek++; } else dirs[i]="KE";
   }
-  // 그래도 남으면 이력 배정을 무작위로 뒤집어 정확히 맞춘다
   for(const i of shuffle([...Array(n).keys()])){
     if(ek < targetEK && dirs[i]==="KE"){ dirs[i]="EK"; ek++; }
     else if(ek > targetEK && dirs[i]==="EK"){ dirs[i]="KE"; ek--; }
   }
   return dirs;
 }
-/* 카드 배열에 순서 섞기 + 방향 배정.
-   remember=false 는 '틀린 것만 다시' 반복 라운드 — 저장소를 건드리지 않는다
-   (누적 오답 저장 규칙과 동일하게 본 라운드만 이력에 반영). */
-function dealCards(cards, remember=true){
+/* 단어: 셔플 + 방향 배정(세션 간 교대) */
+function dealVoca(cards, remember=true){
   shuffle(cards);
   const dirs=assignDirs(cards);
   cards.forEach((c,i)=>c.dir=dirs[i]);
@@ -330,243 +437,249 @@ function dealCards(cards, remember=true){
   }
   return cards;
 }
+/* 독해: 순서대로 + 영→한 고정 (셔플·방향섞기 없음) */
+function dealReading(cards){ cards.forEach(c=>c.dir="EK"); return cards; }
 
-/* 품사표시 → 네모 박스. 세미콜론(품사 경계)에서만 개행 분리.
-   앵커를 '문자열 시작 | 세미콜론 직후'로 좁혔기 때문에 품사 문자를 넉넉히 등재해도
-   문장 중간의 "~할 수 있다"·"전 세계" 같은 표현이 오탐되지 않는다. */
-function posHtml(ko){
-  const boxed = ko.replace(/(^|;\s*)(명|동|형|부|전|접|대|감|조|관|수)(?=\s)/g,
-    (m,pre,p)=> pre + '<span class="pos">'+p+'</span>').replace(/\s+(?=<span class="pos")/g,' ');
-  return boxed.split(/\s*;\s*/).map(s=>s.trim()).filter(Boolean)
-    .map(s=>`<span class="sense">${s}</span>`).join("");
-}
-
-/* ===== 발음 (Web Speech API — 영어만) ===== */
-let enVoice=null;
-function pickVoice(){
-  const vs = speechSynthesis.getVoices();
-  enVoice = vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
-}
-if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, btn){
-  if(!("speechSynthesis" in window)) return;   // 미지원 브라우저는 조용히 무시
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang="en-US"; u.rate=SPEECH_RATES[speechRate]; if(enVoice) u.voice=enVoice;
-  if(btn){ u.onstart=()=>btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
-  speechSynthesis.speak(u);
-}
-function cancelSpeak(){ if("speechSynthesis" in window) speechSynthesis.cancel(); }
-
-/* ===== 종소리 (한글 문제 출제 신호 · Web Audio, iOS·Windows 공통) ===== */
-let audioCtx=null;
-function ensureAudioCtx(){
-  if(audioCtx) return audioCtx;
-  try{ const AC = window.AudioContext||window.webkitAudioContext; if(AC) audioCtx=new AC(); }catch(e){ audioCtx=null; }
-  return audioCtx;
-}
-function unlockAudio(){ const c=ensureAudioCtx(); if(c && c.state==="suspended") c.resume(); } // iOS: 사용자 제스처에서 호출
-/* 한 번의 타격음. specs = [{r:배음비, g:상대게인, d:감쇠초}]
-   상대게인 합으로 나눠 정규화 → 최대 진폭이 vol 이 된다. */
-function strike(f0, specs, vol, delay){
-  const c=ensureAudioCtx(); if(!c) return;
-  if(c.state==="suspended") c.resume();
-  const t0=c.currentTime+delay, sum=specs.reduce((s,p)=>s+p.g,0);
-  const master=c.createGain();
-  master.gain.value=vol/sum; master.connect(c.destination);
-  specs.forEach(({r,g,d})=>{
-    const o=c.createOscillator(), ga=c.createGain();
-    o.type="sine"; o.frequency.value=f0*r;
-    ga.gain.setValueAtTime(0,t0);
-    ga.gain.linearRampToValueAtTime(g,t0+0.003);
-    ga.gain.exponentialRampToValueAtTime(0.0001,t0+d);
-    o.connect(ga); ga.connect(master);
-    o.start(t0); o.stop(t0+d+0.05);
-  });
-}
-/* 출제 신호음 '반짝' — C6·E6·G6 을 0.07초 간격으로 올려 치는 글로켄슈필풍 상승 3음.
-   올라가는 음 = 시작·등장 신호, 들리는 길이 약 0.5초로 짧아 반복(세션당 15회)에 견딘다.
-   후보 비교·음량 조정은 docs/chime-lab.html 참조. */
-const SPARK = [{r:1,g:1,d:0.7},{r:2.0,g:0.35,d:0.45},{r:3.0,g:0.15,d:0.3}];
-function chime(){
-  const v = CHIME_VOL*0.55;   // 3음이 겹치므로 개별 음량을 낮춰 합산 진폭이 1을 넘지 않게
-  strike(1046.5, SPARK, v, 0);
-  strike(1318.5, SPARK, v, 0.07);
-  strike(1568,   SPARK.map(p=>({...p,d:p.d*1.6})), v, 0.14);
-}
-
-/* ===== 누적 오답 저장소 ===== */
-const wrongKey = w => w.en + "|" + w.day;
-/* 범위 학습 본 라운드에서 틀린 단어를 누적 (있으면 missCount+1) */
-function addWrongs(cards){
+/* ===== 오답 저장소 ===== */
+/* 단어: day 기준 누적 */
+function addWrongsVoca(cards){
   if(!cards.length) return;
-  const list = LS.get(K_WRONG, []), d = today();
+  const list=LS.get(K_WRONG, []), d=today();
   cards.forEach(c=>{
-    const e = list.find(w=>w.en===c.en && w.day===c.dayId);
+    const e=list.find(w=>w.en===c.en && w.day===c.dayId);
     if(e){ e.missCount++; e.lastSeen=d; }
     else list.push({en:c.en, ko:c.ko, day:c.dayId, missCount:1, lastSeen:d});
   });
   LS.set(K_WRONG, list);
 }
-/* 오답 복습 본 라운드 정산: 정답=졸업(제거), 오답=missCount+1 유지 */
-function settleReview(cards, wrongs){
-  const missed = new Set(wrongs.map(c=>c.en+"|"+c.dayId));
-  const asked  = new Set(cards.map(c=>c.en+"|"+c.dayId));
-  const d = today();
-  const list = LS.get(K_WRONG, []).filter(w=>{
-    const k = wrongKey(w);
-    if(!asked.has(k)) return true;                            // 이번 복습에 없던 항목은 유지
+function settleReviewVoca(cards, wrongs){
+  const missed=new Set(wrongs.map(c=>c.en+"|"+c.dayId));
+  const asked =new Set(cards.map(c=>c.en+"|"+c.dayId));
+  const d=today();
+  const list=LS.get(K_WRONG, []).filter(w=>{
+    const k=w.en+"|"+w.day;
+    if(!asked.has(k)) return true;
     if(missed.has(k)){ w.missCount++; w.lastSeen=d; return true; }
-    return false;                                             // 첫 시도 정답 → 졸업
+    return false;
   });
   LS.set(K_WRONG, list);
 }
-
-/* ===== 셋업 화면 ===== */
-function dayCard(d){
-  const on = selected.has(d.id) ? "on" : "";
-  const recentIds = daysIndex.slice(0,RECENT_DEFAULT).map(x=>x.id);
-  const recent = recentIds.includes(d.id) ? '<span class="recent">최근</span>' : '';
-  return `<div class="day ${on}" data-id="${d.id}" role="checkbox" aria-checked="${!!on}" tabindex="0">
-    <div class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#F7F3EA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div><div class="name">${d.title}${recent}</div><div class="sub">${d.count}단어</div></div></div>`;
-}
-let oldOpen=false;
-function renderDays(){
-  const ids = daysIndex.map(d=>d.id);
-  // 마지막 선택 범위 복원, 없으면 최신 RECENT_DEFAULT개
-  const saved = LS.get(K_RANGE, []).filter(id=>ids.includes(id));
-  selected = new Set(saved.length ? saved : ids.slice(0,RECENT_DEFAULT));
-  const recent = daysIndex.slice(0,RECENT_VISIBLE), older = daysIndex.slice(RECENT_VISIBLE);
-  $("days").innerHTML = recent.map(dayCard).join("");
-  $("daysOld").innerHTML = older.map(dayCard).join("");
-  // 복원된 선택이 접힌 구간에 있으면 자동으로 펼침
-  oldOpen = older.some(d=>selected.has(d.id));
-  $("daysOld").classList.toggle("hidden", !oldOpen);
-  if(older.length){
-    $("moreDays").classList.remove("hidden");
-    $("moreDays").textContent = oldOpen ? "이전 범위 접기" : `이전 범위 더보기 (${older.length}개)`;
-  } else $("moreDays").classList.add("hidden");
-  bindDayClicks(); updateSetup(); updateReviewBtn();
-  requestAnimationFrame(updateFades);
-}
-function bindDayClicks(){
-  document.querySelectorAll("#days .day, #daysOld .day").forEach(el=>{
-    const toggle = ()=>{ const id = +el.dataset.id;
-      selected.has(id) ? selected.delete(id) : selected.add(id);
-      el.classList.toggle("on"); el.setAttribute("aria-checked", el.classList.contains("on")); updateSetup(); };
-    el.onclick = toggle;
-    el.onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } };
+/* 독해: unit+passage 기준 누적 */
+function addWrongsReading(cards){
+  if(!cards.length) return;
+  const list=LS.get(K_RWRONG, []), d=today();
+  cards.forEach(c=>{
+    const e=list.find(w=>w.en===c.en && w.unit===c.unitId && w.passage===c.passageId);
+    if(e){ e.missCount++; e.lastSeen=d; }
+    else list.push({en:c.en, ko:c.ko, unit:c.unitId, passage:c.passageId, missCount:1, lastSeen:d});
   });
+  LS.set(K_RWRONG, list);
 }
-$("moreDays").onclick=()=>{
-  oldOpen=!oldOpen;
-  $("daysOld").classList.toggle("hidden",!oldOpen);
-  const older=daysIndex.slice(RECENT_VISIBLE);
-  $("moreDays").textContent = oldOpen ? "이전 범위 접기" : `이전 범위 더보기 (${older.length}개)`;
-  updateFades();
-};
-/* 스크롤 위치에 따라 위/아래 페이드 표시 (맨 위면 위 또렷, 맨 아래면 아래 또렷) */
-function updateFades(){
-  const el=$("scrollArea"); if(!el) return;
-  const top=el.scrollTop>2;
-  const bot=el.scrollTop < el.scrollHeight-el.clientHeight-2;
-  el.classList.toggle("fade-top",top);
-  el.classList.toggle("fade-bot",bot);
-}
-function updateSetup(){
-  const n=[...selected].reduce((s,id)=>{ const d=daysIndex.find(x=>x.id===id); return s+(d?d.count:0); },0);
-  $("setupNote").textContent = selected.size===0?"범위를 하나 이상 선택하세요.":`${selected.size}개 범위 · 총 ${n}단어`;
-  $("start").disabled = $("paper").disabled = selected.size===0;
-}
-function updateReviewBtn(){
-  const n = LS.get(K_WRONG, []).length;
-  $("review").classList.toggle("hidden", n===0);
-  if(n) $("review").textContent = `오답 복습 (${n}개)`;
-}
-
-/* 자동발음 스위치 — 설정 저장 */
-function renderAudioSwitch(){
-  $("autoSwitch").classList.toggle("on", audioMode==="auto");
-  $("autoSwitch").setAttribute("aria-checked", audioMode==="auto");
-}
-const toggleAudio = ()=>{ audioMode = audioMode==="auto" ? "off" : "auto"; renderAudioSwitch(); saveSettings(); };
-$("autoSwitch").onclick = toggleAudio;
-$("autoSwitch").onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleAudio(); } };
-
-/* 발음 속도 토글 — 선택 즉시 미리듣기로 속도 체감 */
-function renderRateSegs(){
-  $("rateSegs").querySelectorAll(".seg").forEach(s=>{
-    s.classList.toggle("on", s.dataset.rate===speechRate);
-    s.setAttribute("aria-checked", s.dataset.rate===speechRate);
+function settleReviewReading(cards, wrongs){
+  const missed=new Set(wrongs.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
+  const asked =new Set(cards.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
+  const d=today();
+  const list=LS.get(K_RWRONG, []).filter(w=>{
+    const k=w.en+"|"+w.unit+"|"+w.passage;
+    if(!asked.has(k)) return true;
+    if(missed.has(k)){ w.missCount++; w.lastSeen=d; return true; }
+    return false;
   });
+  LS.set(K_RWRONG, list);
 }
-$("rateSegs").querySelectorAll(".seg").forEach(s=>{
-  const pick = ()=>{ speechRate=s.dataset.rate; renderRateSegs(); saveSettings(); speak("vocabulary"); };
-  s.onclick = pick;
-  s.onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } };
-});
+/* '최근 오답 항목' (가안): lastSeen 이 가장 최근인 항목 하나 */
+function recentWrongVoca(){
+  const list=LS.get(K_WRONG, []); if(!list.length) return null;
+  const top=list.reduce((a,b)=> b.lastSeen>a.lastSeen ? b : a);
+  return { day:top.day, count:list.filter(w=>w.day===top.day).length };
+}
+function recentWrongReading(unitId){
+  const list=LS.get(K_RWRONG, []).filter(w=>w.unit===unitId); if(!list.length) return null;
+  const top=list.reduce((a,b)=> b.lastSeen>a.lastSeen ? b : a);
+  const cnt=list.filter(w=>w.passage===top.passage).length;
+  const u=unitCache[unitId]; const p=u && u.passages.find(x=>x.id===top.passage);
+  return { unit:unitId, passage:top.passage, title:p?p.title:"지문", count:cnt };
+}
 
-/* ===== index.json 로드 ===== */
-async function loadIndex(){
-  $("retryIdx").classList.add("hidden");
-  $("days").innerHTML = '<p class="note" style="margin:8px 0;">목록을 불러오는 중…</p>';
-  try{
-    const idx = await fetchJson("data/index.json");
+/* ===== 라우팅 ===== */
+const SCREENS = ["home","settings","vsetup","vpaper","runits","rpassages","quiz","result"];
+function show(id){ SCREENS.forEach(s=>$(s).classList.toggle("hidden", s!==id)); }
+function setSection(sec){ document.body.classList.toggle("reading-mode", sec==="reading"); }
+function goHome(){ cancelSpeak(); setSection(null); show("home"); }
+
+$("toSettings").onclick = ()=>show("settings");
+$("setBack").onclick = goHome;
+document.querySelectorAll("[data-home]").forEach(b=>b.onclick=goHome);
+
+/* ===== 스크롤 페이드 ===== */
+function bindFade(scrollId){
+  const el=$(scrollId);
+  const upd=()=>{ el.classList.toggle("fade-top", el.scrollTop>2);
+    el.classList.toggle("fade-bot", el.scrollTop < el.scrollHeight-el.clientHeight-2); };
+  el.addEventListener("scroll", upd, {passive:true});
+  requestAnimationFrame(upd);
+  return upd;
+}
+
+/* ===== 단어: DAY 목록 ===== */
+function rowHtml(name, sub, recent){
+  return `<div class="rbody"><div class="rname">${name}${recent?'<span class="recent">최근</span>':''}</div>${sub?`<div class="rsub">${sub}</div>`:''}</div><span class="chev">›</span>`;
+}
+function dayName(d){ // "DAY 12  City & Traffic" → 굵은 DAY 12 + 작은 부제
+  const m = d.title.match(/^(DAY\s*\d+)\s*(.*)$/i);
+  return m ? `${m[1]}<small>${m[2]}</small>` : d.title;
+}
+function renderVdays(){
+  $("vdays").innerHTML = daysIndex.map((d,i)=>
+    `<button class="row" data-id="${d.id}">${rowHtml(dayName(d), `${d.count}단어`, i===0)}</button>`).join("");
+  $("vdays").querySelectorAll(".row").forEach(b=> b.onclick=()=>startVocaStudy(+b.dataset.id));
+  // 오답 복습 (최근 DAY)
+  const rw=recentWrongVoca();
+  const btn=$("vReview");
+  if(rw){ btn.classList.remove("hidden");
+    btn.querySelector(".t").innerHTML=`오답 복습 · <b>DAY ${pad2(rw.day)}</b> (${rw.count})`;
+    btn.onclick=()=>startVocaReview(rw.day);
+  } else btn.classList.add("hidden");
+}
+async function loadVoca(){
+  if(!daysIndex.length){
+    const idx=await fetchJson("data/vocabulary/index.json");
     daysIndex = idx.days || [];
-    if(daysIndex.length){
-      const newest = daysIndex[0].id, oldest = daysIndex[daysIndex.length-1].id;
-      $("hdRange").textContent = daysIndex.length>1
-        ? `DAY ${String(oldest).padStart(2,"0")}–${String(newest).padStart(2,"0")}` : `DAY ${String(newest).padStart(2,"0")}`;
-      renderDays();
-    } else {
-      $("days").innerHTML = '<p class="note" style="margin:8px 0;">등록된 범위가 없습니다.</p>';
-    }
-  }catch(e){
-    $("days").innerHTML = '<p class="note" style="margin:8px 0;">목록을 불러오지 못했어요.<br>네트워크 확인 후 다시 시도하세요.</p>';
-    $("retryIdx").classList.remove("hidden");
-    updateReviewBtn();   // 오프라인이어도 누적 오답 복습은 가능
   }
+  renderVdays();
 }
-$("retryIdx").onclick = loadIndex;
+$("goVoca").onclick=async ()=>{
+  setSection("voca"); show("vsetup");
+  $("vdays").innerHTML='<p class="note">불러오는 중…</p>';
+  try{ await loadVoca(); vFade(); }
+  catch(e){ $("vdays").innerHTML='<p class="note">목록을 불러오지 못했어요.</p>'; }
+};
 
-/* ===== 덱 ===== */
-async function buildDeck(ids){
-  await Promise.all(ids.map(async id=>{
-    if(dayCache[id]) return;
-    const entry = daysIndex.find(d=>d.id===id);
-    dayCache[id] = (await fetchJson("data/"+entry.file)).words;
-  }));
-  const d=[];
-  ids.forEach(id=>dayCache[id].forEach(({en,ko})=>d.push({en,ko,dayId:id})));
-  return dealCards(d);
+/* 단어 학습 시작 (탭=즉시) */
+async function buildDayCards(id){
+  if(!dayCache[id]){
+    const e=daysIndex.find(d=>d.id===id);
+    dayCache[id]=(await fetchJson("data/vocabulary/"+e.file)).words;
+  }
+  return dayCache[id].map(({en,ko})=>({en,ko,dayId:id}));
 }
-function startQuiz(list, kind){ deck=list; pos=0; wrong=[]; sessKind=kind; round=0; show("quiz"); renderCard(); }
-function startRound(list){ deck=dealCards(list.map(c=>({...c})), false); pos=0; wrong=[]; round++; show("quiz"); renderCard(); }
-function show(id){ ["setup","quiz","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); }
+async function startVocaStudy(id){
+  const cards=await buildDayCards(id);
+  speak(" "); unlockAudio();
+  sess={section:"voca", mode:"normal", ordered:false, dayId:id, label:"D"+pad2(id)};
+  startQuiz(dealVoca(cards));
+}
+function startVocaReview(day){
+  const cards=LS.get(K_WRONG, []).filter(w=>w.day===day).map(w=>({en:w.en,ko:w.ko,dayId:day}));
+  if(!cards.length) return;
+  speak(" "); unlockAudio();
+  sess={section:"voca", mode:"review", ordered:false, dayId:day, label:"D"+pad2(day)};
+  startQuiz(dealVoca(cards));
+}
 
-/* ===== 카드 ===== */
+/* ===== 단어: 시험지 ===== */
+function renderPaperDays(){
+  $("paperDays").innerHTML = daysIndex.map(d=>
+    `<button class="row" data-id="${d.id}">${rowHtml(dayName(d), `${d.count}단어`, false)}</button>`).join("");
+  $("paperDays").querySelectorAll(".row").forEach(b=> b.onclick=()=>{
+    location.href = "paper.html?days=" + b.dataset.id + "&v=" + Date.now();
+  });
+}
+$("vPaper").onclick=()=>{ renderPaperDays(); show("vpaper"); requestAnimationFrame(pFade); };
+$("paperBack").onclick=()=>{ show("vsetup"); vFade(); };
+
+/* ===== 독해: UNIT 목록 ===== */
+function unitName(u){
+  const m=u.title.match(/^(UNIT\s*\d+)\s*(.*)$/i);
+  return m ? `${m[1]}<small>${m[2]}</small>` : u.title;
+}
+function renderUnits(){
+  $("units").innerHTML = unitsIndex.map((u,i)=>
+    `<button class="row" data-id="${u.id}">${rowHtml(unitName(u), `지문 ${u.passages}개 · ${u.count}단어`, i===0)}</button>`).join("");
+  $("units").querySelectorAll(".row").forEach(b=> b.onclick=()=>openUnit(+b.dataset.id));
+}
+async function loadReading(){
+  if(!unitsIndex.length){
+    const idx=await fetchJson("data/reading/index.json");
+    unitsIndex = idx.units || [];
+  }
+  renderUnits();
+}
+$("goReading").onclick=async ()=>{
+  setSection("reading"); show("runits");
+  $("units").innerHTML='<p class="note">불러오는 중…</p>';
+  try{ await loadReading(); uFade(); }
+  catch(e){ $("units").innerHTML='<p class="note">목록을 불러오지 못했어요.</p>'; }
+};
+
+/* 독해: UNIT 진입 → 지문 목록 */
+async function openUnit(id){
+  curUnitId=id;
+  if(!unitCache[id]){
+    const e=unitsIndex.find(u=>u.id===id);
+    unitCache[id]=await fetchJson("data/reading/"+e.file);
+  }
+  const u=unitCache[id];
+  const m=u.title.match(/UNIT\s*\d+\s*(.*)$/i);
+  $("rpTitle").textContent=u.title.replace(/\s+/g," ");
+  $("rpH2").textContent="지문 선택 · "+u.title.replace(/\s+/g," ");
+  $("passages").innerHTML = u.passages.map(p=>
+    `<button class="row" data-pid="${p.id}">${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
+  $("passages").querySelectorAll(".row").forEach(b=> b.onclick=()=>startReadingStudy(id, +b.dataset.pid));
+  // 오답 복습 (이 UNIT 내 최근 지문)
+  const rw=recentWrongReading(id);
+  const btn=$("rReview");
+  if(rw){ btn.classList.remove("hidden");
+    btn.querySelector(".t").innerHTML=`오답 복습 · <b>${rw.title}</b> (${rw.count})`;
+    btn.onclick=()=>startReadingReview(rw.unit, rw.passage);
+  } else btn.classList.add("hidden");
+  show("rpassages"); requestAnimationFrame(pgFade);
+}
+$("pgBack").onclick=()=>{ show("runits"); uFade(); };
+
+function passageCards(unitId, passageId){
+  const p=unitCache[unitId].passages.find(x=>x.id===passageId);
+  return p.words.map(({en,ko})=>({en,ko,unitId,passageId}));
+}
+function startReadingStudy(unitId, passageId){
+  const cards=passageCards(unitId, passageId);
+  speak(" "); unlockAudio();
+  sess={section:"reading", mode:"normal", ordered:true, unitId, passageId, label:"U"+pad2(unitId)};
+  startQuiz(dealReading(cards));
+}
+function startReadingReview(unitId, passageId){
+  const cards=LS.get(K_RWRONG, []).filter(w=>w.unit===unitId && w.passage===passageId)
+    .map(w=>({en:w.en,ko:w.ko,unitId,passageId}));
+  if(!cards.length) return;
+  speak(" "); unlockAudio();
+  sess={section:"reading", mode:"review", ordered:true, unitId, passageId, label:"U"+pad2(unitId)};
+  startQuiz(dealReading(cards));
+}
+
+/* ===== 퀴즈 엔진 (공통) ===== */
+function startQuiz(list){ deck=list; pos=0; wrong=[]; round=0; show("quiz"); renderCard(); }
+function startRound(list){
+  const copy=list.map(c=>({...c}));
+  deck = sess.ordered ? dealReading(copy) : dealVoca(copy, false);
+  pos=0; wrong=[]; round++; show("quiz"); renderCard();
+}
 function renderCard(){
   const c=deck[pos]; flipped=false;
   $("card").classList.remove("flip");
   $("grade").classList.add("hidden");
   $("tapflip").style.visibility="visible";
-  const askEN = c.dir==="EK"; // 앞면 영어
+  const askEN = c.dir==="EK";
   $("fTag").textContent = askEN?"영어":"뜻";
   $("bTag").textContent = askEN?"뜻":"영어";
-  // 앞면
   if(askEN){ $("fWord").textContent=c.en; $("fWord").className="word"+(c.en.length>14?" small":""); }
   else { $("fWord").innerHTML=posHtml(c.ko); $("fWord").className="word"+(c.ko.length>14?" small":""); }
-  // 뒷면
   if(askEN){ $("bWord").innerHTML=posHtml(c.ko); $("bWord").className="word"+(c.ko.length>14?" small":""); }
   else { $("bWord").textContent=c.en; $("bWord").className="word"+(c.en.length>14?" small":""); }
-  $("fDay").textContent=dayLabel(c.dayId); $("bDay").textContent=dayLabel(c.dayId);
-  // 스피커: 영어가 보이는 면에만
+  $("fDay").textContent=sess.label; $("bDay").textContent=sess.label;
   $("fSpk").classList.toggle("show", askEN);
   $("bSpk").classList.toggle("show", !askEN);
   $("prog").style.width=(pos/deck.length*100)+"%";
   $("count").textContent=`${pos+1} / ${deck.length}`;
-  // 자동재생: 영어가 앞면이면 발음, 한글이 앞면이면 종소리로 출제 신호
   if(audioMode==="auto"){ askEN ? setTimeout(()=>speak(c.en,$("fSpk")),250) : setTimeout(chime,250); }
 }
 function flip(){
@@ -575,27 +688,30 @@ function flip(){
   $("tapflip").style.visibility="hidden";
   $("grade").classList.remove("hidden");
   const c=deck[pos];
-  if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300); // 뒤집어 영어 나오면
+  if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300);
 }
 $("card").onclick=flip;
-$("card").onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); } };
+$("card").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); } };
 $("fSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("fSpk")); };
 $("bSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("bSpk")); };
 
 function grade(ok){ const c=deck[pos]; if(!ok) wrong.push(c); pos++; if(pos>=deck.length) finish(); else renderCard(); }
 $("gRight").onclick=()=>grade(true);
 $("gWrong").onclick=()=>grade(false);
-$("quit").onclick=()=>{ if(confirm("학습을 그만둘까요? 진행 상황은 저장되지 않습니다.")){ cancelSpeak(); renderDays(); show("setup"); } };
+$("quit").onclick=()=>{ if(confirm("학습을 그만둘까요? 진행 상황은 저장되지 않습니다.")){ cancelSpeak(); backToSetup(); } };
+
+function backToSetup(){
+  if(sess.section==="voca"){ renderVdays(); show("vsetup"); vFade(); }
+  else { openUnit(sess.unitId); }   // 지문 목록으로 (오답 갱신 반영)
+}
 
 /* ===== 결과 ===== */
 function finish(){
   cancelSpeak();
-  // 본 라운드(0)만 누적 오답 저장소를 갱신 — 반복 라운드는 저장에 영향 없음
   if(round===0){
-    if(sessKind==="normal") addWrongs(wrong);
-    else settleReview(deck, wrong);
+    if(sess.section==="voca"){ sess.mode==="normal" ? addWrongsVoca(wrong) : settleReviewVoca(deck, wrong); }
+    else { sess.mode==="normal" ? addWrongsReading(wrong) : settleReviewReading(deck, wrong); }
   }
-  // '맞출 때까지': 반복 라운드에서 오답이 남으면 자동으로 다음 라운드
   if(round>0 && wrong.length>0){ startRound(wrong); return; }
   const total=deck.length, w=wrong.length, r=total-w;
   $("prog").style.width="100%";
@@ -609,47 +725,42 @@ function finish(){
   show("result");
 }
 $("redoWrong").onclick=()=>startRound(wrong);
-$("again").onclick=async ()=>{
-  if(!selected.size){ renderDays(); show("setup"); return; }
-  startQuiz(await buildDeck([...selected]),"normal");   // day 파일은 캐시돼 있어 즉시 시작
+$("again").onclick=()=>{
+  if(sess.section==="voca") startVocaStudy(sess.dayId);
+  else startReadingStudy(sess.unitId, sess.passageId);
 };
-$("reselect").onclick=()=>{ renderDays(); show("setup"); };
+$("reselect").onclick=backToSetup;
 
-/* ===== 시작 ===== */
-$("start").onclick=async ()=>{
-  const btn=$("start");
-  btn.disabled=true; btn.textContent="불러오는 중…";
-  LS.set(K_RANGE, [...selected]);
-  try{
-    const cards = await buildDeck([...selected]);
-    speak(" "); unlockAudio();   // iOS 오디오 잠금 해제 (발음·종소리)
-    startQuiz(cards,"normal");
-  }catch(e){
-    $("setupNote").textContent="단어 데이터를 불러오지 못했어요. 네트워크 확인 후 다시 시도하세요.";
-  }finally{
-    btn.textContent="학습 시작"; btn.disabled = selected.size===0;
-  }
-};
-/* 시험지: 선택 범위를 그대로 넘겨 인쇄 화면으로 */
-$("paper").onclick=()=>{
-  if(!selected.size) return;
-  LS.set(K_RANGE, [...selected]);
-  // v= 시각: GitHub Pages 가 max-age=600 을 보내므로 그냥 열면 옛 파일이 뜬다
-  location.href = "paper.html?days=" + [...selected].sort((a,b)=>a-b).join(",") + "&v=" + Date.now();
-};
-$("review").onclick=()=>{
-  const list = LS.get(K_WRONG, []);
-  if(!list.length) return;
-  const cards = dealCards(list.map(w=>({en:w.en, ko:w.ko, dayId:w.day})));
-  speak(" "); unlockAudio();
-  startQuiz(cards,"review");
-};
+/* ===== 설정 UI ===== */
+function renderAudioSwitch(){
+  $("autoSwitch").classList.toggle("on", audioMode==="auto");
+  $("autoSwitch").setAttribute("aria-checked", audioMode==="auto");
+}
+const toggleAudio=()=>{ audioMode = audioMode==="auto" ? "off" : "auto"; renderAudioSwitch(); saveSettings(); };
+$("autoSwitch").onclick=toggleAudio;
+$("autoSwitch").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleAudio(); } };
+function renderRateSegs(){
+  $("rateSegs").querySelectorAll(".seg").forEach(s=>{
+    s.classList.toggle("on", s.dataset.rate===speechRate);
+    s.setAttribute("aria-checked", s.dataset.rate===speechRate);
+  });
+}
+$("rateSegs").querySelectorAll(".seg").forEach(s=>{
+  const pick=()=>{ speechRate=s.dataset.rate; renderRateSegs(); saveSettings(); speak("vocabulary"); };
+  s.onclick=pick;
+  s.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } };
+});
+
+/* ===== 페이드 바인딩 ===== */
+const vFade  = bindFade("vScroll");
+const pFade  = bindFade("pScroll");
+const uFade  = bindFade("uScroll");
+const pgFade = bindFade("pgScroll");
+window.addEventListener("resize", ()=>{ vFade(); pFade(); uFade(); pgFade(); });
 
 renderAudioSwitch();
 renderRateSegs();
-loadIndex();
-$("scrollArea").addEventListener("scroll", updateFades, {passive:true});
-window.addEventListener("resize", updateFades);
+goHome();
 </script>
 </body>
 </html>

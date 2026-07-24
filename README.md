@@ -1,52 +1,66 @@
-# 단어 카드 학습 웹앱 (스타터)
+# 영어 학습 웹앱 (단어 · 독해)
 
-자녀용 영어 단어 카드 학습 앱. 정적 사이트로 GitHub Pages에 배포한다.
+자녀용 영어 학습 앱. 정적 사이트로 GitHub Pages에 배포한다.
 사진 판독은 앱이 하지 않는다 — Claude 대화에서 판독·검증한 단어를 이 리포에 데이터로 넣는다.
+
+앱은 홈에서 **단어(Vocabulary) / 독해(Reading)** 두 메뉴로 나뉜다.
+- **단어**: DAY별 단어를 카드로 학습(영↔한 섞어 출제). DAY 하나를 골라 바로 시작.
+- **독해**: UNIT → 지문(소단원)으로 들어가 카드로 학습(**영→한 고정 · 번호 순서대로**).
 
 ## 폴더 구조
 ```
 .
-├─ index.html                  # 학습 웹앱 (카드 학습·오답 복습)
-├─ paper.html                  # 인쇄용 지필 시험지 (DAY당 2장, 브라우저 인쇄로 PDF 저장)
+├─ index.html                     # 학습 웹앱 (홈 · 단어 · 독해 · 오답 복습)
+├─ paper.html                     # 인쇄용 지필 시험지 (단어 전용)
+├─ assets/
+│  └─ codetherabbit-logo.svg      # 홈 하단 로고
 ├─ data/
-│  ├─ index.json               # DAY 목록(최신순) — 앱이 먼저 읽음
-│  └─ day09.json ~ day12.json  # DAY별 단어
+│  ├─ vocabulary/                 # 단어(DAY)
+│  │  ├─ index.json               #   DAY 목록(최신순)
+│  │  └─ day09.json ~ day12.json  #   DAY별 단어
+│  └─ reading/                    # 독해(UNIT)
+│     ├─ index.json               #   UNIT 목록(최신순)
+│     └─ unit07.json              #   UNIT별(지문 passages 포함) 단어
 ├─ scripts/
-│  └─ import_words.py          # words.json → data/dayNN.json + index 재생성
+│  ├─ import_words.py             # words.json  → data/vocabulary/dayNN.json + index
+│  └─ import_reading.py           # reading.json → data/reading/unitNN.json + index
 └─ docs/
-   ├─ IMPLEMENTATION_SPEC.md   # 구현 명세 (먼저 읽을 것)
-   ├─ mockup.html              # 확정된 UX 프로토타입 (시각/동작 기준)
-   └─ chime-lab.html           # 출제 종소리 후보 시청·음량 조정 도구
+   ├─ IMPLEMENTATION_SPEC.md      # 구현 명세 (먼저 읽을 것)
+   ├─ prompt-vocabulary.md        # 단어 사진 → words.json 프롬프트 (모바일 Claude용)
+   ├─ prompt-reading.md           # 독해 사진 → reading.json 프롬프트 (모바일 Claude용)
+   └─ chime-lab.html              # 출제 종소리 시청·음량 조정 도구
 ```
 
-## 새 DAY 추가 워크플로
-1. Claude 대화(모바일 가능)에서 단어장 사진을 판독·검증 → `words.json` 생성.
-2. 그 words.json을 리포 루트에 두고:
+## 새 데이터 추가 워크플로 (단어 · 독해 공통)
+1. **모바일 Claude 대화**에 단어장/어휘 리스트 **사진**을 첨부하고, 해당 프롬프트를 붙여넣어 JSON을 생성:
+   - 단어(DAY): `docs/prompt-vocabulary.md` → `words.json`
+   - 독해(UNIT): `docs/prompt-reading.md` → `reading.json`  (한 UNIT = JSON 한 개)
+2. 그 JSON을 리포 루트에 저장하고 변환:
    ```
-   python scripts/import_words.py words.json
+   python scripts/import_words.py words.json       # 단어
+   python scripts/import_reading.py reading.json    # 독해
    ```
-   → `data/dayNN.json` 저장 + `data/index.json` 재생성(최신 DAY가 위).
-3. 변경분 커밋·푸시. GitHub Pages에 반영되면 자녀 기기에서 새 DAY가 보인다.
-   - "바로 반영"을 위해 앱의 데이터 fetch에 캐시 무효화가 있어야 함(명세 7절).
+   → `data/…/…json` 저장 + 각 `index.json` 재생성(최신이 위).
+3. 변경분 커밋·푸시 → GitHub Pages 반영 → 자녀 기기에서 자동으로 새 DAY/UNIT이 보인다.
+   - 앱의 데이터 fetch에 캐시 무효화(`?v=시각`)가 있어 "커밋하면 바로 반영"된다.
 
-### 모바일에서 추가할 때 (확정 워크플로)
-1. 모바일 Claude 앱 대화에서 단어장 사진 판독·검증 → words.json 내용 생성.
-2. **Claude Code 웹**(claude.ai/code 또는 모바일 앱 Code 탭)에서 이 리포로 세션 열기.
-3. JSON을 프롬프트에 붙여넣고 지시: "words.json으로 저장하고 `python scripts/import_words.py words.json` 실행 후 커밋·푸시".
-   - 클라우드 세션에 파일 첨부는 안 됨 — 텍스트 붙여넣기가 표준. 샌드박스에 Python 내장.
+### Claude Code 웹에서 추가할 때
+1. 모바일 Claude 앱 대화에서 사진 판독·검증 → JSON 생성.
+2. **Claude Code 웹**에서 이 리포로 세션 열기.
+3. JSON을 붙여넣고 지시: "`words.json`(또는 `reading.json`)으로 저장하고 import 스크립트 실행 후 커밋·푸시".
 4. 웹 세션은 main 직접 push가 차단되어 **브랜치 push + PR 생성**까지 진행됨.
-5. GitHub 모바일(앱/웹)에서 **PR merge 1탭** → Pages 자동 재배포 → 자녀 기기 즉시 반영.
+5. GitHub 모바일에서 **PR merge 1탭** → Pages 자동 재배포 → 자녀 기기 즉시 반영.
 
-## 상태 (2026-07-21)
-`index.html` 구현 완료·배포됨 → https://codetherabbit.github.io/vocab-quiz/
-- data/*.json fetch + 캐시 무효화, localStorage(설정·누적 오답·마지막 범위·방향 이력), 오답 복습, 발음 속도 설정
-- **출제 신호음**: 한글 문제에 상승 3음 종소리('반짝'). 후보 비교는 `docs/chime-lab.html`
-- **출제 방향**: 세션 EK:KE 5:5 + 단어별 세션 간 교대(`vq.dirHist`)
-- **인쇄 시험지**: `paper.html` — DAY당 2장(시험지1·2), 브라우저 인쇄로 PDF 저장
-- 확정된 설계 결정은 `docs/IMPLEMENTATION_SPEC.md` 6절·9절·10절 참조
+## 상태 (2026-07-24)
+배포 URL: https://codetherabbit.github.io/vocab-quiz/
+- **홈 + 단어/독해 2메뉴** 구조. 모든 목록은 단일 선택 — **항목을 탭하면 바로 학습 시작**.
+- **단어**: DAY 하나 학습, 영↔한 세션 5:5 + 단어별 세션 간 교대(`vq.dirHist`), 한글 문제엔 종소리.
+- **독해**: UNIT→지문, **영→한 고정 · 순서대로**, 항상 영어가 앞면이라 발음 자동. 쿨 배경톤으로 구역 구분.
+- **오답 복습**: 단어=DAY별 · 독해=지문별로 **분리 저장**. 각 목록 맨 아래 "최근 항목 오답" 한 줄(오답 있을 때만).
+- **인쇄 시험지**(`paper.html`, 단어 전용): DAY 하나씩. 2단은 시험지1·2를 한 장에(정답면이라 잘라서/접어서 배부).
+- 확정된 설계 결정은 `docs/IMPLEMENTATION_SPEC.md` 참조.
 
 ## 원칙 (지킬 것)
 - 백엔드·API 키 없음(정적·무료). 빌드 단계 없음, 외부 라이브러리 없음.
 - 판독은 앱 밖(대화 게이트)에서. 데이터엔 원자료 저장, 표기 변환은 표시 단계에서만.
-- `dayNN.json`의 `ko`는 **원자료 그대로 보존** — 품사 박스·개행 같은 표기는 데이터에 굳히지 말 것.
-  표기 규칙이 바뀌어도 데이터를 다시 만들지 않기 위해서다.
+- `data/**/*.json`의 `ko`는 **원자료 그대로 보존** — 품사 박스·개행 같은 표기는 데이터에 굳히지 말 것.
