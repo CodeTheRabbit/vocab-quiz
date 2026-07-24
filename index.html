@@ -353,7 +353,6 @@ const LS = {
   get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-const today = () => { const d=new Date(), p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
 async function fetchJson(path){
   const res = await fetch(`${path}?v=${Date.now()}`, {cache:"no-store"});
   if(!res.ok) throw new Error(`${path} 로드 실패 (${res.status})`);
@@ -467,7 +466,7 @@ function dealReading(cards){ cards.forEach(c=>c.dir="EK"); return cards; }
 /* 단어: day 기준 누적 */
 function addWrongsVoca(cards){
   if(!cards.length) return;
-  const list=LS.get(K_WRONG, []), d=today();
+  const list=LS.get(K_WRONG, []), d=Date.now();
   cards.forEach(c=>{
     const e=list.find(w=>w.en===c.en && w.day===c.dayId);
     if(e){ e.missCount++; e.lastSeen=d; }
@@ -478,7 +477,7 @@ function addWrongsVoca(cards){
 function settleReviewVoca(cards, wrongs){
   const missed=new Set(wrongs.map(c=>c.en+"|"+c.dayId));
   const asked =new Set(cards.map(c=>c.en+"|"+c.dayId));
-  const d=today();
+  const d=Date.now();
   const list=LS.get(K_WRONG, []).filter(w=>{
     const k=w.en+"|"+w.day;
     if(!asked.has(k)) return true;
@@ -490,7 +489,7 @@ function settleReviewVoca(cards, wrongs){
 /* 독해: unit+passage 기준 누적 */
 function addWrongsReading(cards){
   if(!cards.length) return;
-  const list=LS.get(K_RWRONG, []), d=today();
+  const list=LS.get(K_RWRONG, []), d=Date.now();
   cards.forEach(c=>{
     const e=list.find(w=>w.en===c.en && w.unit===c.unitId && w.passage===c.passageId);
     if(e){ e.missCount++; e.lastSeen=d; }
@@ -501,7 +500,7 @@ function addWrongsReading(cards){
 function settleReviewReading(cards, wrongs){
   const missed=new Set(wrongs.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
   const asked =new Set(cards.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
-  const d=today();
+  const d=Date.now();
   const list=LS.get(K_RWRONG, []).filter(w=>{
     const k=w.en+"|"+w.unit+"|"+w.passage;
     if(!asked.has(k)) return true;
@@ -681,7 +680,7 @@ function startReadingReview(unitId, passageId){
 }
 
 /* ===== 퀴즈 엔진 (공통) ===== */
-function startQuiz(list){ deck=list; pos=0; wrong=[]; round=0; show("quiz"); renderCard(); }
+function startQuiz(list){ if(!list.length) return; deck=list; pos=0; wrong=[]; round=0; show("quiz"); renderCard(); }
 function startRound(list){
   const copy=list.map(c=>({...c}));
   deck = sess.ordered ? dealReading(copy) : dealVoca(copy, false);
@@ -750,8 +749,8 @@ function finish(){
 }
 $("redoWrong").onclick=()=>startRound(wrong);
 $("again").onclick=()=>{
-  if(sess.section==="voca") startVocaStudy(sess.dayId);
-  else startReadingStudy(sess.unitId, sess.passageId);
+  if(sess.section==="voca") sess.mode==="review" ? startVocaReview(sess.dayId) : startVocaStudy(sess.dayId);
+  else sess.mode==="review" ? startReadingReview(sess.unitId, sess.passageId) : startReadingStudy(sess.unitId, sess.passageId);
 };
 $("reselect").onclick=backToSetup;
 

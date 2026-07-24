@@ -19,7 +19,8 @@ UX는 `vocab_quiz_mockup.html`(동작 프로토타입)에서 확정됐다. 그 �
 - **데이터 구조**: DAY별 `data/dayNN.json` + `data/index.json`. 전량 보존.
 
 ## 2. 데이터 형식
-### data/dayNN.json
+> 폴더는 **data/vocabulary/**(단어) · **data/reading/**(독해)로 분리됨(11절). 아래는 단어 기준 형식이며, 독해(UNIT>지문 passages)는 11절 참조.
+### data/vocabulary/dayNN.json
 ```json
 { "id": 9, "title": "DAY 09  Clothes", "subtitle": "Clothes",
   "words": [ {"en":"fashion","ko":"명 유행, 패션"},
@@ -31,7 +32,7 @@ UX는 `vocab_quiz_mockup.html`(동작 프로토타입)에서 확정됐다. 그 �
     품사 문자를 4종 → 11종으로 늘렸는데 `data/*.json`은 한 글자도 건드리지 않았다.
   - 시험지(`paper.html`)는 `ko`를 **가공 없이 그대로** 인쇄한다(품사 박스 없음).
 
-### data/index.json
+### data/vocabulary/index.json
 ```json
 { "days": [ {"id":10,"file":"day10.json","title":"DAY 10  School & Education","subtitle":"School & Education","count":30},
             {"id":9, "file":"day09.json", ...} ] }
@@ -111,7 +112,7 @@ UX는 `vocab_quiz_mockup.html`(동작 프로토타입)에서 확정됐다. 그 �
 
 ## 7. 캐시 무효화 (중요)
 - GitHub Pages·브라우저 캐시가 옛 JSON을 물면 새 DAY가 늦게 뜬다.
-- index.json / dayNN.json fetch 시 **버전 쿼리** 부여: 예 `fetch('data/index.json?v=' + Date.now())`
+- index.json / dayNN.json fetch 시 **버전 쿼리** 부여: 예 `fetch('data/vocabulary/index.json?v=' + Date.now())`
   또는 배포 해시. "커밋하면 자녀 기기에서 바로 반영"을 보장하려면 필수.
 
 ## 8. 품질 기준
@@ -119,7 +120,7 @@ UX는 `vocab_quiz_mockup.html`(동작 프로토타입)에서 확정됐다. 그 �
 - 실기기(iOS 사파리/안드로이드 크롬)에서 하단 고정·발음·페이드 최종 확인.
 
 ## 9. 미결 항목 → 결정 기록 (2026-07-14 확정)
-- 오답 저장 범위: **날짜 누적** 채택(vq.wrong). 시작 화면에 "오답 복습 (N개)" 진입점 추가(0개면 숨김, 오프라인에서도 동작).
+- 오답 저장 범위: **날짜 누적** 채택(vq.wrong). 시작 화면에 "오답 복습 (N개)" 진입점 추가(0개면 숨김). (→ 11절에서 **항목별 분리**로 개정: 단어=DAY별·독해=지문별, 각 목록 하단 1줄. 목록이 index fetch에 의존하므로 오프라인 진입은 불가.)
 - "맞출 때까지" 반복 규칙: **자동 반복 + 1회 정답 졸업** 채택(오답이 남으면 자동 다음 라운드).
 - 기본 노출·체크 수: 2 유지. `RECENT_VISIBLE`/`RECENT_DEFAULT` 상수(index.html 상단)로 노출 — 실사용 후 조정.
 - 인증 게이트: **미도입 유지**(1절 (A) 가림막 수준 그대로). 트래픽 남용(DDoS 등)은 GitHub 인프라 영역·과금 없음 확인.

@@ -1,9 +1,9 @@
 /* 서비스 워커 — network-first
-   목적: 홈화면(standalone) 앱이 옛 HTML을 캐싱해 코드 변경이 안 보이던 문제 해결.
-   - 온라인: 항상 네트워크에서 최신(캐시 우회)으로 받고, 쉘(HTML/에셋)은 오프라인용으로 캐시.
-   - 오프라인: 캐시로 폴백.
-   데이터(data/**?v=시각)는 쿼리가 있어 캐시에 남기지 않는다(매번 새로 받으므로). */
-const CACHE = 'vq-shell-v2';
+   온라인이면 항상 네트워크 최신(캐시 우회)으로 받고, 쿼리 없는 정상(200) 쉘 파일만
+   오프라인용으로 보관한다. 오프라인이면 캐시로 폴백.
+   - 데이터(data/**?v=시각)는 쿼리가 있어 캐시에 남기지 않는다(매번 새로 받으므로).
+   - 오류(404/500) 응답은 fresh.ok 로 걸러 캐시하지 않는다. */
+const CACHE = 'vq-shell-v3';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -23,8 +23,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith((async () => {
     try {
       const fresh = await fetch(req, { cache: 'no-store' });
-      // 쿼리 없는 쉘 파일만 오프라인용으로 보관 (데이터의 ?v= 는 제외)
-      if (req.mode === 'navigate' || !url.search) {
+      if (!url.search && fresh.ok) {           // 쿼리 없는 정상 쉘만 보관
         const cache = await caches.open(CACHE);
         cache.put(req, fresh.clone());
       }

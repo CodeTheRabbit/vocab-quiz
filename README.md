@@ -12,8 +12,12 @@
 .
 ├─ index.html                     # 학습 웹앱 (홈 · 단어 · 독해 · 오답 복습)
 ├─ paper.html                     # 인쇄용 지필 시험지 (단어 전용)
+├─ manifest.json                  # PWA 매니페스트 (홈화면 앱 이름·아이콘)
+├─ sw.js                          # 서비스 워커 (network-first — 코드 자동 갱신·오프라인)
 ├─ assets/
-│  └─ codetherabbit-logo.svg      # 홈 하단 로고
+│  ├─ codetherabbit-logo.svg      # 홈 하단 로고
+│  ├─ app-icon.svg                # 파비콘
+│  └─ apple-touch-icon.png        # 아이폰 홈화면 아이콘 (180px)
 ├─ data/
 │  ├─ vocabulary/                 # 단어(DAY)
 │  │  ├─ index.json               #   DAY 목록(최신순)

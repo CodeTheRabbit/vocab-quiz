@@ -17,8 +17,7 @@
   /* 크기 x 배치 프리셋. JS 가 <html> 에 data-size / data-layout 을 걸면 여기서 값이 정해진다.
      모바일 사파리는 페이지를 통째로 1.2배 안팎 확대해 인쇄하므로 CSS 상 높이를 줄여둬야 한다.
      2단은 블록 폭이 절반이라 뜻 칸이 좁아지므로 글자와 열 폭을 함께 줄인다. */
-  /* 값은 .sheet 마다 정해진다 — 홀수로 남은 DAY 는 2단 모드에서도 1단으로 그려지므로,
-     :root 가 아니라 시트 단위로 걸어야 그 장만 1단 값을 쓴다. */
+  /* 값은 .sheet 마다(data-lay) 정해진다 — 시트 단위로 걸어야 1단/2단 프리셋이 각 장에 맞게 적용된다. */
   :root{ --fs:9pt; --pad:3pt; --hfs:12pt; --lfs:9pt; --btfs:9pt; --colno:11mm; --colen:44mm; }
   /* pad 를 키운 건 글자를 키우는 대신 '손글씨 쓸 칸'을 넓히기 위해서다.
      실측(iOS 인쇄): 표가 231mm 에서 끝나 바닥글까지 54mm 가 비었다 → 행 높이로 회수. */
@@ -42,7 +41,7 @@
     border-bottom:2pt solid #000; padding-bottom:3pt; margin-bottom:6pt;}
   .hdr .t{font-size:var(--hfs); font-weight:normal;}
   .hdr .lab{font-size:var(--lfs); font-weight:normal;}
-  /* 2단 배치: DAY 두 개를 좌·우 블록으로 */
+  /* 2단 배치: 한 DAY의 시험지1·2를 좌·우 블록으로(한 장에) */
   .row{display:flex; gap:6mm;}
   .block{flex:1; min-width:0;}
   .block .bt{font-size:var(--btfs); margin-bottom:3pt;}
@@ -133,7 +132,7 @@ const dayLabel = id => "DAY "+String(id).padStart(2,"0");
 const K_PAPER = "vq.paper";     // [최신, 직전] 최대 2벌
 const K_RANGE = "vq.lastRange"; // 학습 화면과 공유
 const K_SIZE   = "vq.paperSize";   // "mobile" | "desktop" — 실제 값은 CSS 프리셋에 있다
-const K_LAYOUT = "vq.paperLayout"; // "one" (DAY당 1장) | "two" (DAY 2개를 한 장에)
+const K_LAYOUT = "vq.paperLayout"; // "one" (DAY당 시험지1·2 각 1장) | "two" (한 DAY의 시험지1·2를 한 장에)
 const A4_BODY_MM = 273;            // A4 세로 297 - 상하 여백 12mm
 const LS = {
   get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
