@@ -50,7 +50,7 @@
   .hcard .arrow{position:absolute; right:22px; bottom:22px; font-size:24px; opacity:.8;}
   .hcard .ico{position:absolute; right:20px; top:20px; width:36px; height:36px; opacity:.3;}
   .logo{flex:none; padding-top:14px; display:flex; justify-content:center;}
-  .logo img{width:96px; height:auto; opacity:.42;}
+  .logo img{width:128px; height:auto; opacity:.5;}
 
   /* ===== 목록 (단어 DAY · 독해 UNIT/지문 공통) ===== */
   .scrolllist{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
@@ -83,6 +83,13 @@
   .paperrow svg{width:18px; height:18px;}
   .paperrow .chev{margin-left:auto; font-size:18px; color:var(--muted);}
   .note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5;}
+
+  /* 독해 지문 화면 — 진입한 UNIT 컨텍스트 배너(깊이 구분) */
+  .unithero{flex:none; border-radius:16px; padding:15px 18px; margin-bottom:14px; color:#fff;
+    background:linear-gradient(150deg,#2E6E9E,#20517A); box-shadow:0 6px 16px rgba(32,81,122,.28);}
+  .unithero .uk{font-size:11px; font-weight:800; letter-spacing:.14em; opacity:.72; text-transform:uppercase;}
+  .unithero .ut{font-size:23px; font-weight:800; margin:2px 0;}
+  .unithero .us{font-size:12px; opacity:.82; font-weight:600;}
 
   /* ===== 설정 ===== */
   .setrow{margin-top:6px;}
@@ -249,8 +256,9 @@
 
   <!-- ===== 독해: 지문 목록 ===== -->
   <section id="rpassages" class="screen hidden">
-    <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand"><small id="rpTitle"></small></div><span style="width:40px"></span></div>
-    <h2 id="rpH2">지문 선택</h2>
+    <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand">독해</div><span style="width:40px"></span></div>
+    <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
+    <h2>지문 선택</h2>
     <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
     <div class="foot">
       <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
@@ -620,9 +628,10 @@ async function openUnit(id){
     unitCache[id]=await fetchJson("data/reading/"+e.file);
   }
   const u=unitCache[id];
-  const m=u.title.match(/UNIT\s*\d+\s*(.*)$/i);
-  $("rpTitle").textContent=u.title.replace(/\s+/g," ");
-  $("rpH2").textContent="지문 선택 · "+u.title.replace(/\s+/g," ");
+  const total=u.passages.reduce((s,p)=>s+p.words.length,0);
+  $("ruKicker").textContent="UNIT "+pad2(u.id);
+  $("ruTitle").textContent=u.subtitle || u.title;
+  $("ruSub").textContent=`지문 ${u.passages.length}개 · ${total}단어`;
   $("passages").innerHTML = u.passages.map(p=>
     `<button class="row" data-pid="${p.id}">${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
   $("passages").querySelectorAll(".row").forEach(b=> b.onclick=()=>startReadingStudy(id, +b.dataset.pid));
