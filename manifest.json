@@ -1,0 +1,13 @@
+{
+  "name": "영어 학습",
+  "short_name": "영어학습",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#22345C",
+  "theme_color": "#22345C",
+  "icons": [
+    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
