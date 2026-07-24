@@ -32,7 +32,11 @@
   /* Reading 섹션 쿨 종이톤 (배경으로 구역 구분). --ink 는 건드리지 않는다(글자색 유지) */
   body.reading-mode{ --paper:#E7ECF2; --cream:#F3F6FB; --line:#D2DAE4; }
 
-  .app{width:100%; max-width:460px; min-height:100dvh; display:flex; flex-direction:column; padding:18px 18px 24px;}
+  /* 높이 = 화면 - 안전영역(노치·홈바). body 의 safe-area 패딩과 합쳐져 화면을 넘겨
+     스크롤이 생기고 하단 로고가 잘리던 문제 수정. */
+  .app{width:100%; max-width:460px;
+    min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; padding:18px 18px 24px;}
   .screen{flex:1; display:flex; flex-direction:column; min-height:0;}
   .hidden{display:none !important;}
 
