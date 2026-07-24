@@ -70,6 +70,10 @@
   .row .recent{font-size:10px; color:var(--gold); font-weight:800; letter-spacing:.05em; margin-left:8px;}
   .chev{font-size:20px; font-weight:800; flex:none; color:var(--ink);}
   .reading-mode .chev{color:var(--read);}
+  /* 독해 지문 번호 배지(작게) + 지문 행 살짝 낮춤 — 지문 3개 이상에도 균형 */
+  .pnum{flex:none; width:22px; height:22px; border-radius:7px; background:var(--read); color:#fff;
+    font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;}
+  #passages .row{padding:12px 14px;}
 
   .foot{flex:none; padding-top:12px; display:flex; flex-direction:column; gap:9px;}
   .reviewrow{display:flex; align-items:center; gap:8px; width:100%; font-family:inherit; cursor:pointer;
@@ -632,8 +636,8 @@ async function openUnit(id){
   $("ruKicker").textContent="UNIT "+pad2(u.id);
   $("ruTitle").textContent=u.subtitle || u.title;
   $("ruSub").textContent=`지문 ${u.passages.length}개 · ${total}단어`;
-  $("passages").innerHTML = u.passages.map(p=>
-    `<button class="row" data-pid="${p.id}">${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
+  $("passages").innerHTML = u.passages.map((p,i)=>
+    `<button class="row" data-pid="${p.id}"><span class="pnum">${i+1}</span>${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
   $("passages").querySelectorAll(".row").forEach(b=> b.onclick=()=>startReadingStudy(id, +b.dataset.pid));
   // 오답 복습 (이 UNIT 내 최근 지문)
   const rw=recentWrongReading(id);
