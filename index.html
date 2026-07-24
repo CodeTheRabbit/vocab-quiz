@@ -786,5 +786,11 @@ renderAudioSwitch();
 renderRateSegs();
 goHome();
 </script>
+<script>
+/* 서비스 워커 등록 — 홈화면 앱이 코드 변경을 다음 실행에 바로 반영하도록(network-first). */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
 </body>
 </html>
