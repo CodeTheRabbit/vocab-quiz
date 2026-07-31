@@ -1,6 +1,14 @@
 {
  "units": [
   {
+   "id": 8,
+   "file": "unit08.json",
+   "title": "UNIT 08  Nature",
+   "subtitle": "Nature",
+   "passages": 2,
+   "count": 67
+  },
+  {
    "id": 7,
    "file": "unit07.json",
    "title": "UNIT 07  Arts",

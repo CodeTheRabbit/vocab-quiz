@@ -1,0 +1,287 @@
+{
+ "id": 8,
+ "title": "UNIT 08  Nature",
+ "subtitle": "Nature",
+ "passages": [
+  {
+   "id": 1,
+   "title": "The Smell of Rain",
+   "words": [
+    {
+     "en": "rainy",
+     "ko": "형 비가 오는"
+    },
+    {
+     "en": "raindrop",
+     "ko": "명 빗방울"
+    },
+    {
+     "en": "tap",
+     "ko": "동 두드리다"
+    },
+    {
+     "en": "earthy",
+     "ko": "형 흙의"
+    },
+    {
+     "en": "scent",
+     "ko": "명 냄새, 향"
+    },
+    {
+     "en": "refreshing",
+     "ko": "형 상쾌한"
+    },
+    {
+     "en": "pleasant",
+     "ko": "형 기분 좋은"
+    },
+    {
+     "en": "refer to",
+     "ko": "~을 가리키다, 나타내다"
+    },
+    {
+     "en": "fluid",
+     "ko": "명 액체, 체액"
+    },
+    {
+     "en": "myth",
+     "ko": "명 신화"
+    },
+    {
+     "en": "rainwater",
+     "ko": "명 빗물"
+    },
+    {
+     "en": "actual",
+     "ko": "형 실제의"
+    },
+    {
+     "en": "source",
+     "ko": "명 원천"
+    },
+    {
+     "en": "combination",
+     "ko": "명 조합"
+    },
+    {
+     "en": "material",
+     "ko": "명 물질"
+    },
+    {
+     "en": "release",
+     "ko": "동 방출하다"
+    },
+    {
+     "en": "mix",
+     "ko": "동 섞다"
+    },
+    {
+     "en": "chemical",
+     "ko": "명 화학물질"
+    },
+    {
+     "en": "certain",
+     "ko": "형 특정한"
+    },
+    {
+     "en": "soil",
+     "ko": "명 토양"
+    },
+    {
+     "en": "strong",
+     "ko": "형 강한"
+    },
+    {
+     "en": "tiny",
+     "ko": "형 작은"
+    },
+    {
+     "en": "air bubble",
+     "ko": "기포"
+    },
+    {
+     "en": "contain",
+     "ko": "동 포함하고 있다"
+    },
+    {
+     "en": "mixture",
+     "ko": "명 혼합물"
+    },
+    {
+     "en": "belove",
+     "ko": "동 ~을 사랑하다"
+    },
+    {
+     "en": "experience",
+     "ko": "동 경험하다"
+    },
+    {
+     "en": "breath",
+     "ko": "명 숨"
+    },
+    {
+     "en": "chemical structure",
+     "ko": "화학구조"
+    },
+    {
+     "en": "substance",
+     "ko": "명 물질"
+    },
+    {
+     "en": "burst",
+     "ko": "동 터지다"
+    },
+    {
+     "en": "spread",
+     "ko": "동 퍼뜨리다, 퍼지다"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Ocean Oxygen",
+   "words": [
+    {
+     "en": "rainforest",
+     "ko": "명 (열대)우림"
+    },
+    {
+     "en": "lung",
+     "ko": "명 폐"
+    },
+    {
+     "en": "role",
+     "ko": "명 역할"
+    },
+    {
+     "en": "oxygen",
+     "ko": "명 산소"
+    },
+    {
+     "en": "billion",
+     "ko": "명 10억"
+    },
+    {
+     "en": "organism",
+     "ko": "명 생명체"
+    },
+    {
+     "en": "surface",
+     "ko": "명 표면"
+    },
+    {
+     "en": "perform",
+     "ko": "동 수행하다"
+    },
+    {
+     "en": "photosynthesis",
+     "ko": "명 광합성"
+    },
+    {
+     "en": "absorb",
+     "ko": "동 흡수하다"
+    },
+    {
+     "en": "carbon dioxide",
+     "ko": "이산화탄소"
+    },
+    {
+     "en": "sunlight",
+     "ko": "명 햇빛"
+    },
+    {
+     "en": "convert",
+     "ko": "동 변환하다"
+    },
+    {
+     "en": "material",
+     "ko": "명 물질"
+    },
+    {
+     "en": "energy source",
+     "ko": "에너지원"
+    },
+    {
+     "en": "release",
+     "ko": "동 방출하다"
+    },
+    {
+     "en": "byproduct",
+     "ko": "명 부산물"
+    },
+    {
+     "en": "process",
+     "ko": "명 과정"
+    },
+    {
+     "en": "atmosphere",
+     "ko": "명 대기"
+    },
+    {
+     "en": "pose",
+     "ko": "동 가하다, 제기하다"
+    },
+    {
+     "en": "salty",
+     "ko": "형 염도가 높은, 짠"
+    },
+    {
+     "en": "acidic",
+     "ko": "형 산성의"
+    },
+    {
+     "en": "harm",
+     "ko": "동 해를 끼치다"
+    },
+    {
+     "en": "die off",
+     "ko": "죽어 나가다"
+    },
+    {
+     "en": "action",
+     "ko": "명 (문제 해결을 위한) 조치"
+    },
+    {
+     "en": "reverse",
+     "ko": "동 뒤집다"
+    },
+    {
+     "en": "trend",
+     "ko": "명 추세"
+    },
+    {
+     "en": "resource",
+     "ko": "명 자원"
+    },
+    {
+     "en": "destroy",
+     "ko": "동 파괴하다"
+    },
+    {
+     "en": "risk",
+     "ko": "명 위험"
+    },
+    {
+     "en": "region",
+     "ko": "명 지역"
+    },
+    {
+     "en": "threat",
+     "ko": "명 위협"
+    },
+    {
+     "en": "significant",
+     "ko": "형 중대한"
+    },
+    {
+     "en": "essential",
+     "ko": "형 필수의, 필수적인"
+    },
+    {
+     "en": "water pollution",
+     "ko": "수질 오염"
+    }
+   ]
+  }
+ ]
+}
