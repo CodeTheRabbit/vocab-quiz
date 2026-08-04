@@ -81,6 +81,11 @@
   .row .recent{font-size:10px; color:var(--gold); font-weight:800; letter-spacing:.05em; margin-left:8px;}
   .chev{font-size:20px; font-weight:800; flex:none; color:var(--ink);}
   .reading-mode .chev{color:var(--read);}
+  /* 학습 상태 배지 — 오늘 그 항목을 어디까지 했는지 (목록 행 오른쪽) */
+  .badge{flex:none; font-weight:800; font-size:16px; line-height:1;}
+  .badge.star{color:var(--gold);}
+  .badge.done{color:var(--right-d);}
+  .badge.part{font-size:11.5px; color:var(--wrong-d); font-variant-numeric:tabular-nums;}
   /* 독해 지문 번호 배지(작게) + 지문 행 살짝 낮춤 — 지문 3개 이상에도 균형 */
   .pnum{flex:none; width:22px; height:22px; border-radius:7px; background:var(--read); color:#fff;
     font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;}
@@ -98,6 +103,11 @@
   .paperrow svg{width:18px; height:18px;}
   .paperrow .chev{margin-left:auto; font-size:18px; color:var(--muted);}
   .note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5;}
+  /* 배지 범례 — 목록 화면의 ? 아이콘으로 펼친다 */
+  .legend{flex:none; font-size:11.5px; color:var(--muted); line-height:1.9; margin:0 0 10px;
+    background:var(--cream); border:1.5px dashed var(--line); border-radius:12px; padding:10px 14px;}
+  .legend b{font-weight:800; color:var(--ink);}
+  .legend .star{color:var(--gold);} .legend .done{color:var(--right-d);} .legend .part{color:var(--wrong-d);}
 
   /* 독해 지문 화면 — 진입한 UNIT 컨텍스트 배너(깊이 구분) */
   .unithero{flex:none; border-radius:16px; padding:15px 18px; margin-bottom:14px; color:#fff;
@@ -185,6 +195,20 @@
   .wlist li{display:flex; justify-content:space-between; gap:14px; padding:11px 4px; border-bottom:1px solid var(--line); text-align:left; align-items:baseline;}
   .wlist .en{font-weight:700;} .wlist .ko{color:var(--muted); font-size:13.5px; text-align:right;}
 
+  /* ===== 학습 기록 ===== */
+  .prsec{margin-bottom:20px;}
+  .prsec .hd{font-size:12.5px; font-weight:800; color:var(--muted); letter-spacing:.03em; margin:0 2px 9px;}
+  .pritem{background:var(--cream); border:1.5px solid var(--line); border-radius:13px; padding:12px 14px; margin-bottom:8px;}
+  .pritem .l1{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+  .pritem .nm{font-weight:800; font-size:14.5px;}
+  .pritem .vd{font-size:12.5px; font-weight:800; flex:none; white-space:nowrap;}
+  .pritem .vd.star{color:var(--gold);} .pritem .vd.done{color:var(--right-d);} .pritem .vd.part{color:var(--wrong-d);}
+  .pritem .l2{color:var(--muted); font-size:12px; margin-top:4px; font-variant-numeric:tabular-nums;}
+  .prcnt{display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    padding:10px 4px; border-bottom:1px solid var(--line); font-size:13.5px; font-weight:700;}
+  .prcnt span{color:var(--muted); font-weight:800; font-variant-numeric:tabular-nums;}
+  .prempty{color:var(--muted); font-size:13px; padding:8px 2px;}
+
   :focus-visible{outline:2.5px solid var(--gold); outline-offset:2px;}
   @media (prefers-reduced-motion: reduce){
     .card{transition:none;} .prog i{transition:none;} .spk.playing{animation:none;}
@@ -199,9 +223,14 @@
   <section id="home" class="screen">
     <div class="top">
       <div class="brand">영어 학습</div>
+      <div style="display:flex; gap:2px;">
+      <button class="iconbtn" id="toProgress" aria-label="학습 기록" title="학습 기록">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </button>
       <button class="iconbtn" id="toSettings" aria-label="설정">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
+      </div>
     </div>
     <div class="home">
       <button class="hcard voca" id="goVoca">
@@ -241,13 +270,25 @@
     </div>
   </section>
 
+  <!-- ===== 학습 기록 (부모 확인용) ===== -->
+  <section id="progress" class="screen hidden">
+    <div class="top"><button class="navback" id="progBack">← 홈</button><div class="brand">학습 기록</div><span style="width:40px"></span></div>
+    <div class="scrolllist" id="prScroll"><div id="progBody"></div></div>
+  </section>
+
   <!-- ===== 단어: DAY 목록 ===== -->
   <section id="vsetup" class="screen hidden">
     <div class="top"><button class="navback" data-home>← 홈</button><div class="brand">단어</div>
+      <div style="display:flex; gap:2px;">
+      <button class="iconbtn" id="vHelp" aria-label="표시 설명" title="표시 설명">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.6-2.9 4"/><path d="M12 17.2h.01"/></svg>
+      </button>
       <button class="iconbtn" id="vPaper" aria-label="시험지 만들기" title="시험지 만들기">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-      </button></div>
+      </button>
+      </div></div>
     <h2>DAY 선택 · 최신이 위</h2>
+    <p class="legend hidden" id="vLegend"></p>
     <div class="scrolllist" id="vScroll"><div class="list" id="vdays"></div></div>
     <div class="foot">
       <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span></button>
@@ -271,9 +312,13 @@
 
   <!-- ===== 독해: 지문 목록 ===== -->
   <section id="rpassages" class="screen hidden">
-    <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand">독해</div><span style="width:40px"></span></div>
+    <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand">독해</div>
+      <button class="iconbtn" id="pgHelp" aria-label="표시 설명" title="표시 설명">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.6-2.9 4"/><path d="M12 17.2h.01"/></svg>
+      </button></div>
     <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
     <h2>지문 선택</h2>
+    <p class="legend hidden" id="pgLegend"></p>
     <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
     <div class="foot">
       <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
@@ -334,7 +379,7 @@
     <button id="redoWrong" class="btn primary">틀린 것만 다시 (맞출 때까지)</button>
     <div class="btn-row" style="margin-top:10px;">
       <button id="again" class="btn ghost">처음부터</button>
-      <button id="reselect" class="btn ghost">범위 다시</button>
+      <button id="reselect" class="btn ghost">목록으로</button>
     </div>
   </section>
 </div>
@@ -349,6 +394,9 @@ const K_SETTINGS = "vq.settings";        // {autoplay, rate} — 단어·독해 
 const K_WRONG    = "vq.wrong";           // 단어 오답 [{en,ko,day,missCount,lastSeen}]
 const K_DIRH     = "vq.dirHist";         // 단어 방향 이력 {"en|dayId":"EK"|"KE"}
 const K_RWRONG   = "vq.reading.wrong";   // 독해 오답 [{en,ko,unit,passage,missCount,lastSeen}]
+const K_PROG     = "vq.progress";        // 학습 기록 {"YYYY-MM-DD":[세션,…]} — 세션 스키마는 아래 logStart 참조
+const PROG_KEEP  = 14;                   // 보관 일수
+const EXAM_DAYS  = [1, 5];               // 시험 요일(0=일). 시험 당일 밤 24시에 누적 횟수 리셋
 const LS = {
   get(k, fb){ try{ const v=localStorage.getItem(k); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -523,8 +571,70 @@ function recentWrongReading(unitId){
   return { unit:unitId, passage:top.passage, title:p?p.title:"지문", count:cnt };
 }
 
+/* ===== 학습 기록 (vq.progress) =====
+   세션 1건 = {k, label, n, done, end:"run"|"done"|"quit", clear, rev, t0, t1}
+   k = 항목 키(단어 "v12" · 독해 "r7:1"). 배지·누적 횟수는 전부 이 배열에서 계산한다. */
+const dkey = ts => { const d=new Date(ts); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; };
+const hhmm = ts => { const d=new Date(ts); return `${pad2(new Date(ts).getHours())}:${pad2(new Date(ts).getMinutes())}`; };
+
+/* 이번 시험 주기의 시작 = 직전 시험일의 다음 날. 시험 당일 아침 벼락치기까지 이번 주기에 포함된다. */
+function cycleStartKey(){
+  const d=new Date(); d.setHours(0,0,0,0);
+  for(let i=1;i<=7;i++){
+    const p=new Date(d); p.setDate(p.getDate()-i);
+    if(EXAM_DAYS.includes(p.getDay())){ p.setDate(p.getDate()+1); return dkey(p.getTime()); }
+  }
+  return dkey(d.getTime());
+}
+function progAll(){ return LS.get(K_PROG, {}); }
+function progSave(all){
+  const out={}; Object.keys(all).sort().slice(-PROG_KEEP).forEach(k=>out[k]=all[k]);
+  LS.set(K_PROG, out);
+}
+let curLog = null;   // 진행 중인 세션 위치 {date, idx}
+function logStart(k, label, n, rev){
+  const now=Date.now(), date=dkey(now), all=progAll();
+  (all[date] = all[date] || []).push({k, label, n, done:0, end:"run", clear:false, rev:!!rev, t0:now, t1:now});
+  curLog={date, idx:all[date].length-1};
+  progSave(all);
+}
+function logUpdate(fn){
+  if(!curLog) return;
+  const all=progAll(), day=all[curLog.date];
+  if(!day || !day[curLog.idx]) { curLog=null; return; }
+  fn(day[curLog.idx]); day[curLog.idx].t1=Date.now();
+  progSave(all);
+}
+const logProgress = done => logUpdate(s=>{ if(done>s.done) s.done=done; });
+/* 종료. curLog 는 끊지 않는다 — 「틀린 것만 다시」로 오답을 0으로 만들면 같은 세션이 ★ 로
+   승격돼야 하므로. 다음 logStart 가 덮어쓰니 남겨둬도 다른 세션에 섞이지 않는다. */
+function logEnd(end, clear){
+  if(!curLog) return;
+  const all=progAll(), day=all[curLog.date], s=day && day[curLog.idx];
+  if(!s){ curLog=null; return; }
+  s.end=end; if(clear) s.clear=true; s.t1=Date.now();
+  /* 한 장도 안 하고 나온 세션은 학습이 아니다 — 잘못 눌러 들어갔다 나온 것까지 쌓이면 기록이 묻힌다 */
+  if(end==="quit" && s.done===0){ day.splice(curLog.idx,1); curLog=null; }
+  progSave(all);
+}
+
+/* 오늘 그 항목의 배지 — 그날 최고 상태를 남긴다(후퇴 없음).
+   배지의 근거는 정규 학습이다. 다만 완주 뒤 오답을 정리했다면 「틀린 것만 다시」로 잡았든
+   목록의 「오답 복습」으로 잡았든 성취가 같으므로 둘 다 ★ 로 올린다. */
+function todayBadge(k){
+  const day=(progAll()[dkey(Date.now())]||[]).filter(s=>s.k===k);
+  const main=day.filter(s=>!s.rev);
+  if(!main.length) return "";                       // 복습만 한 날은 표시하지 않는다
+  const done = main.some(s=>s.end==="done");
+  if(main.some(s=>s.clear) || (done && day.some(s=>s.rev && s.clear)))
+    return '<span class="badge star">★</span>';
+  if(done) return '<span class="badge done">✓</span>';
+  const best=main.reduce((a,b)=> b.done>a.done ? b : a);
+  return best.done>0 ? `<span class="badge part">${best.done}/${best.n}</span>` : "";
+}
+
 /* ===== 라우팅 ===== */
-const SCREENS = ["home","settings","vsetup","vpaper","runits","rpassages","quiz","result"];
+const SCREENS = ["home","settings","progress","vsetup","vpaper","runits","rpassages","quiz","result"];
 function show(id){ SCREENS.forEach(s=>$(s).classList.toggle("hidden", s!==id)); }
 function setSection(sec){ document.body.classList.toggle("reading-mode", sec==="reading"); }
 function goHome(){ cancelSpeak(); setSection(null); show("home"); }
@@ -544,8 +654,8 @@ function bindFade(scrollId){
 }
 
 /* ===== 단어: DAY 목록 ===== */
-function rowHtml(name, sub, recent){
-  return `<div class="rbody"><div class="rname">${name}${recent?'<span class="recent">최근</span>':''}</div>${sub?`<div class="rsub">${sub}</div>`:''}</div><span class="chev">›</span>`;
+function rowHtml(name, sub, recent, badge){
+  return `<div class="rbody"><div class="rname">${name}${recent?'<span class="recent">최근</span>':''}</div>${sub?`<div class="rsub">${sub}</div>`:''}</div>${badge||""}<span class="chev">›</span>`;
 }
 function dayName(d){ // "DAY 12  City & Traffic" → 굵은 DAY 12 + 작은 부제
   const m = d.title.match(/^(DAY\s*\d+)\s*(.*)$/i);
@@ -553,7 +663,7 @@ function dayName(d){ // "DAY 12  City & Traffic" → 굵은 DAY 12 + 작은 부�
 }
 function renderVdays(){
   $("vdays").innerHTML = daysIndex.map((d,i)=>
-    `<button class="row" data-id="${d.id}">${rowHtml(dayName(d), `${d.count}단어`, i===0)}</button>`).join("");
+    `<button class="row" data-id="${d.id}">${rowHtml(dayName(d), `${d.count}단어`, i===0, todayBadge("v"+d.id))}</button>`).join("");
   $("vdays").querySelectorAll(".row").forEach(b=> b.onclick=()=>startVocaStudy(+b.dataset.id));
   // 오답 복습 (최근 DAY)
   const rw=recentWrongVoca();
@@ -589,6 +699,7 @@ async function startVocaStudy(id){
   const cards=await buildDayCards(id);
   speak(" "); unlockAudio();
   sess={section:"voca", mode:"normal", ordered:false, dayId:id, label:"D"+pad2(id)};
+  logStart("v"+id, "DAY "+pad2(id), cards.length, false);
   startQuiz(dealVoca(cards));
 }
 function startVocaReview(day){
@@ -596,6 +707,7 @@ function startVocaReview(day){
   if(!cards.length) return;
   speak(" "); unlockAudio();
   sess={section:"voca", mode:"review", ordered:false, dayId:day, label:"D"+pad2(day)};
+  logStart("v"+day, "DAY "+pad2(day)+" 오답복습", cards.length, true);
   startQuiz(dealVoca(cards));
 }
 
@@ -647,7 +759,7 @@ async function openUnit(id){
   $("ruTitle").textContent=u.subtitle || u.title;
   $("ruSub").textContent=`지문 ${u.passages.length}개 · ${total}단어`;
   $("passages").innerHTML = u.passages.map((p,i)=>
-    `<button class="row" data-pid="${p.id}"><span class="pnum">${i+1}</span>${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
+    `<button class="row" data-pid="${p.id}"><span class="pnum">${i+1}</span>${rowHtml(p.title, `${p.words.length}단어`, false, todayBadge(`r${id}:${p.id}`))}</button>`).join("");
   $("passages").querySelectorAll(".row").forEach(b=> b.onclick=()=>startReadingStudy(id, +b.dataset.pid));
   // 오답 복습 (이 UNIT 내 최근 지문)
   const rw=recentWrongReading(id);
@@ -664,10 +776,17 @@ function passageCards(unitId, passageId){
   const p=unitCache[unitId].passages.find(x=>x.id===passageId);
   return p.words.map(({en,ko})=>({en,ko,unitId,passageId}));
 }
+/* 기록 라벨용 지문 번호 (지문 목록에 보이는 ①②… 순번과 같다) */
+function passageLabel(unitId, passageId){
+  const u=unitCache[unitId];
+  const i=u ? u.passages.findIndex(x=>x.id===passageId) : -1;
+  return `U${pad2(unitId)} 지문${i>=0 ? i+1 : passageId}`;
+}
 function startReadingStudy(unitId, passageId){
   const cards=passageCards(unitId, passageId);
   speak(" "); unlockAudio();
   sess={section:"reading", mode:"normal", ordered:true, unitId, passageId, label:"U"+pad2(unitId)};
+  logStart(`r${unitId}:${passageId}`, passageLabel(unitId, passageId), cards.length, false);
   startQuiz(dealReading(cards));
 }
 function startReadingReview(unitId, passageId){
@@ -676,6 +795,7 @@ function startReadingReview(unitId, passageId){
   if(!cards.length) return;
   speak(" "); unlockAudio();
   sess={section:"reading", mode:"review", ordered:true, unitId, passageId, label:"U"+pad2(unitId)};
+  logStart(`r${unitId}:${passageId}`, passageLabel(unitId, passageId)+" 오답복습", cards.length, true);
   startQuiz(dealReading(cards));
 }
 
@@ -718,10 +838,12 @@ $("card").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); f
 $("fSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("fSpk")); };
 $("bSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("bSpk")); };
 
-function grade(ok){ const c=deck[pos]; if(!ok) wrong.push(c); pos++; if(pos>=deck.length) finish(); else renderCard(); }
+function grade(ok){ const c=deck[pos]; if(!ok) wrong.push(c); pos++;
+  if(round===0) logProgress(pos);          // 본 라운드만 진행 기록 (반복 라운드는 덱이 오답뿐)
+  if(pos>=deck.length) finish(); else renderCard(); }
 $("gRight").onclick=()=>grade(true);
 $("gWrong").onclick=()=>grade(false);
-$("quit").onclick=()=>{ if(confirm("학습을 그만둘까요? 진행 상황은 저장되지 않습니다.")){ cancelSpeak(); backToSetup(); } };
+$("quit").onclick=()=>{ if(confirm("학습을 그만둘까요? 진행 상황은 저장되지 않습니다.")){ cancelSpeak(); logEnd("quit"); backToSetup(); } };
 
 function backToSetup(){
   if(sess.section==="voca"){ renderVdays(); show("vsetup"); vFade(); }
@@ -736,11 +858,14 @@ function finish(){
     else { sess.mode==="normal" ? addWrongsReading(wrong) : settleReviewReading(deck, wrong); }
   }
   if(round>0 && wrong.length>0){ startRound(wrong); return; }
+  /* 여기 도달 = 본 라운드를 끝냈거나(오답 남음) 반복으로 오답을 0으로 만든 경우 */
+  logEnd("done", wrong.length===0);
   const total=deck.length, w=wrong.length, r=total-w;
   $("prog").style.width="100%";
   $("score").textContent=Math.round(r/total*100)+"%";
   $("scoreCap").textContent = w===0?"전부 맞혔어요 🎉":`${total}개 중 ${r}개 정답`;
   $("rCnt").textContent=r; $("wCnt").textContent=w;
+  $("reselect").textContent = sess.section==="voca" ? "DAY 목록" : "지문 목록";
   const has=w>0;
   $("reviewArea").style.display=has?"block":"none";
   $("redoWrong").style.display=has?"block":"none";
@@ -774,12 +899,73 @@ $("rateSegs").querySelectorAll(".seg").forEach(s=>{
   s.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } };
 });
 
+/* ===== 배지 범례 (목록 화면 ? 아이콘) ===== */
+const LEGEND_HTML =
+  '<b class="star">★</b> 끝까지 하고 <b>오답까지 다 맞힘</b><br>'+
+  '<b class="done">✓</b> 끝까지 했지만 <b>틀린 게 남음</b><br>'+
+  '<b class="part">18/30</b> 30장 중 18장까지 하고 그만둠<br>'+
+  '표시가 없으면 오늘은 학습하지 않은 것';
+function bindHelp(btnId, boxId){
+  $(boxId).innerHTML = LEGEND_HTML;
+  $(btnId).onclick = ()=> $(boxId).classList.toggle("hidden");
+}
+bindHelp("vHelp",  "vLegend");
+bindHelp("pgHelp", "pgLegend");
+
+/* ===== 학습 기록 화면 ===== */
+const mins = (a,b) => Math.max(1, Math.round((b-a)/60000));
+const md   = k => { const p=k.split("-"); return `${+p[1]}/${+p[2]}`; };
+function verdictOf(s){
+  /* ★ 은 정규 학습 전용 — 오답 복습의 클리어는 뜻이 달라 ✓ 로 구분한다 */
+  if(s.clear)          return s.rev ? {cls:"done", txt:"✓ 오답 정리 완료"} : {cls:"star", txt:"★ 오답까지 완료"};
+  if(s.end==="done")   return {cls:"done", txt:"✓ 끝까지"};
+  return {cls:"part", txt:"⋯ 중간에 그만둠"};
+}
+function renderProgress(){
+  const all=progAll(), now=new Date(), today=dkey(now.getTime());
+  const list=all[today]||[];
+  let html = '<div class="prsec"><div class="hd">'
+    + `오늘 ${now.getMonth()+1}/${now.getDate()} (${"일월화수목금토"[now.getDay()]})`
+    + (list.length ? ` · ${list.length}회 학습 · ${list.reduce((s,x)=>s+mins(x.t0,x.t1),0)}분` : "")
+    + '</div>';
+  html += list.length ? list.slice().reverse().map(s=>{   // 최근 세션이 위
+    const v=verdictOf(s);
+    const cnt = s.end==="done" ? `${s.n}문항` : `${s.n}문항 중 ${s.done}개`;
+    return `<div class="pritem">
+      <div class="l1"><span class="nm">${s.label}</span><span class="vd ${v.cls}">${v.txt}</span></div>
+      <div class="l2">${cnt} · ${hhmm(s.t0)}~${hhmm(s.t1)} · ${mins(s.t0,s.t1)}분</div>
+    </div>`;
+  }).join("") : '<div class="prempty">아직 학습 기록이 없어요</div>';
+  html += '</div>';
+
+  /* 이번 시험 주기 — 정규 학습의 완주 횟수만 센다 */
+  const from=cycleStartKey();
+  const days=Object.keys(all).filter(k=>k>=from && all[k].length).sort();
+  const cnt={}, labels={};
+  days.forEach(k=> all[k].forEach(s=>{
+    if(s.rev || s.end!=="done") return;
+    cnt[s.k]=(cnt[s.k]||0)+1; labels[s.k]=s.label;
+  }));
+  const keys=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
+  html += '<div class="prsec"><div class="hd">이번 시험 대비'
+    + (days.length ? ` · ${days.length}일 (${days.slice().reverse().map(md).join(" · ")})` : "")
+    + '</div>'
+    + (keys.length
+        ? keys.map(k=>`<div class="prcnt">${labels[k]}<span>${cnt[k]}회 완료</span></div>`).join("")
+        : '<div class="prempty">이번 시험 대비 끝까지 마친 학습이 없어요</div>')
+    + '</div>';
+  $("progBody").innerHTML=html;
+}
+$("toProgress").onclick=()=>{ renderProgress(); show("progress"); requestAnimationFrame(prFade); };
+$("progBack").onclick=goHome;
+
 /* ===== 페이드 바인딩 ===== */
+const prFade = bindFade("prScroll");
 const vFade  = bindFade("vScroll");
 const pFade  = bindFade("pScroll");
 const uFade  = bindFade("uScroll");
 const pgFade = bindFade("pgScroll");
-window.addEventListener("resize", ()=>{ vFade(); pFade(); uFade(); pgFade(); });
+window.addEventListener("resize", ()=>{ vFade(); pFade(); uFade(); pgFade(); prFade(); });
 
 renderAudioSwitch();
 renderRateSegs();
