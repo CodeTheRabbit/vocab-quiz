@@ -131,6 +131,9 @@ const esc = s => String(s??"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">"
 const dayLabel = id => "DAY "+String(id).padStart(2,"0");
 const K_PAPER = "vq.paper";     // [최신, 직전] 최대 2벌
 const K_RANGE = "vq.lastRange"; // 학습 화면과 공유
+/* 주소로 두 종류를 가른다: ?days=… = 단어(DAY), ?unit=…&p=… = 독해(지문) */
+const Q = new URLSearchParams(location.search);
+const READ = Q.has("unit");
 const K_SIZE   = "vq.paperSize";   // "mobile" | "desktop" — 실제 값은 CSS 프리셋에 있다
 const K_LAYOUT = "vq.paperLayout"; // "one" (DAY당 시험지1·2 각 1장) | "two" (한 DAY의 시험지1·2를 한 장에)
 const A4_BODY_MM = 273;            // A4 세로 297 - 상하 여백 12mm
@@ -160,11 +163,13 @@ const rows1 = (w, t1)     => w.map((x,i)=>({en:x.en, ko:x.ko, type:t1[i]}));
 const rows2 = (w, t1, o2) => o2.map(j=>({en:w[j].en, ko:w[j].ko, type:flip(t1[j])}));
 
 /* ===== 렌더 ===== */
-function tableHtml(rows){
+/* start = 첫 행에 붙일 번호 - 1. 독해 2단은 한 지문을 좌·우로 쪼개므로
+   오른쪽 표가 1이 아니라 이어지는 번호부터 시작해야 한다. */
+function tableHtml(rows, start=0){
   let h = "<tr><th class='no'>No</th><th class='en'>English</th><th class='ko'>뜻 (한글)</th></tr>";
   rows.forEach((r,i)=>{
     const k = r.type==="K";      // K = 뜻 빈칸(영어 제시)
-    h += `<tr><td class='no'>${i+1}</td><td class='en'>${k?esc(r.en):""}</td>`
+    h += `<tr><td class='no'>${start+i+1}</td><td class='en'>${k?esc(r.en):""}</td>`
        + `<td class='ko'>${k?"":esc(r.ko)}</td></tr>`;
   });
   return `<table>${h}</table>`;
@@ -175,12 +180,14 @@ function sheetOne(title, label, rows){
        + `<span class="t">${esc(title)}</span><span class="lab">${esc(label)}</span>`
        + `</div>${tableHtml(rows)}</section>`;
 }
-/* 2단 — 페이지 머리는 '단어 시험', DAY 제목은 좌·우 블록마다 (원본 파이썬 도구와 같은 구성) */
-function sheetTwo(blocks, label){
+/* 2단 — 페이지 머리는 '단어 시험', DAY 제목은 좌·우 블록마다 (원본 파이썬 도구와 같은 구성).
+   블록 제목은 있을 때만 단다 — 독해는 한 지문을 쪼갠 것이라 블록마다 붙일 제목이 없다. */
+function sheetTwo(blocks, label, title="단어 시험"){
   const bs = blocks.map(b=>
-    `<div class="block"><div class="bt">${esc(b.title)}</div>${tableHtml(b.rows)}</div>`).join("");
+    `<div class="block">${b.title?`<div class="bt">${esc(b.title)}</div>`:""}`
+    + `${tableHtml(b.rows, b.start||0)}</div>`).join("");
   return `<section class="sheet" data-lay="two"><div class="hdr">`
-       + `<span class="t">단어 시험</span><span class="lab">${esc(label)}</span>`
+       + `<span class="t">${esc(title)}</span><span class="lab">${esc(label)}</span>`
        + `</div><div class="row">${bs}</div></section>`;
 }
 const L1 = "시험지 1", L2 = "시험지 2 (순서·방향 변경)";
@@ -202,6 +209,38 @@ function buildSheets(p){
     "※ 시험지 2 = 정답면 · 잘라서/접어서 배부"));
 }
 
+/* ===== 독해: 지문 시험지 =====
+   단어 시험지와 다른 점 세 가지.
+   1) 방향은 '영어 제시 · 뜻 쓰기'(K) 하나로 고정 — 뜻을 묻는 문제만 낸다.
+   2) 행 순서는 데이터(=출제) 순서 그대로 — 섞지 않는다.
+   위 둘 때문에 매번 같은 시험지가 나오므로 3) 무작위 배정·이력('새로 뽑기'·'직전 시험지')이
+   필요 없다. 그래서 2단은 시험지1·2 배치가 아니라, 한 지문을 앞 절반(좌)·뒤 절반(우)으로
+   나눠 한 장에 담는 용도로 쓴다. */
+let read = null;   // {unitTitle, no, title, words}
+function renderRead(){
+  const w = read.words, half = Math.ceil(w.length/2);
+  const rowsK = a => a.map(x=>({en:x.en, ko:x.ko, type:"K"}));
+  $("wrap").innerHTML = sheetTwo(
+    [{rows:rowsK(w.slice(0,half))},
+     {rows:rowsK(w.slice(half)), start:half}],
+    `${read.unitTitle}  ·  ${w.length}단어`,
+    `지문 ${read.no} · ${read.title}`);
+  $("meta").textContent =
+    `${read.unitTitle} · 지문 ${read.no} ${read.title} — ${w.length}단어 · 1장`;
+  measure();
+}
+async function startRead(unitId, passageId){
+  const units = (await fetchJson("data/reading/index.json")).units || [];
+  const e = units.find(u=>u.id===unitId);
+  if(!e) throw new Error(`등록되지 않은 UNIT (unit=${unitId})`);
+  const u = await fetchJson("data/reading/"+e.file);
+  const i = (u.passages||[]).findIndex(p=>p.id===passageId);
+  if(i<0) throw new Error(`등록되지 않은 지문 (p=${passageId})`);
+  read = { unitTitle:u.title, no:i+1, title:u.passages[i].title, words:u.passages[i].words };
+  document.title = "독해 단어 시험지";
+  renderRead();
+}
+
 /* ===== 상태 ===== */
 const dayData = {};   // id → {title, words}
 let ids = [];         // 출제할 DAY (오름차순)
@@ -218,7 +257,9 @@ const guessSize = () =>
 
 /* 크기·배치 적용 + '한 장에 들어가는지' 실측 표시 */
 let size   = ["mobile","desktop"].includes(LS.get(K_SIZE,""))   ? LS.get(K_SIZE)   : guessSize();
-let layout = ["one","two"].includes(LS.get(K_LAYOUT,""))        ? LS.get(K_LAYOUT) : "one";
+/* 독해는 2단 고정 — 저장은 하지 않아 단어 화면의 선택을 덮어쓰지 않는다 */
+let layout = READ ? "two"
+  : (["one","two"].includes(LS.get(K_LAYOUT,"")) ? LS.get(K_LAYOUT) : "one");
 function applyOpts(rerender){
   document.documentElement.dataset.size = size;
   $("sizeSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.size===size));
@@ -304,6 +345,7 @@ function draw(){
 /* ===== 시작 ===== */
 async function start(){
   try{
+    if(READ){ await startRead(+Q.get("unit"), +Q.get("p")); return; }
     const all = ((await fetchJson("data/vocabulary/index.json")).days || []);
     if(!all.length) throw new Error("등록된 범위 없음");
     const q = new URLSearchParams(location.search).get("days");
@@ -335,6 +377,12 @@ $("sizeSeg").querySelectorAll("button").forEach(b=>{
 $("layoutSeg").querySelectorAll("button").forEach(b=>{
   b.onclick=()=>{ layout=b.dataset.layout; LS.set(K_LAYOUT,layout); applyOpts(true); };
 });
+/* 독해는 배치가 2단 하나뿐이고 매번 같은 시험지라 두 버튼을 감춘다.
+   .miniseg 가 display:flex 라 hidden 속성은 듣지 않으므로 style 로 지운다. */
+if(READ){
+  $("layoutSeg").style.display = "none";
+  $("redraw").style.display    = "none";
+}
 applyOpts(false);
 $("print").onclick  = ()=>window.print();
 $("redraw").onclick = draw;

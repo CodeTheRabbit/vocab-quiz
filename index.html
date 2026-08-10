@@ -89,7 +89,7 @@
   /* 독해 지문 번호 배지(작게) + 지문 행 살짝 낮춤 — 지문 3개 이상에도 균형 */
   .pnum{flex:none; width:22px; height:22px; border-radius:7px; background:var(--read); color:#fff;
     font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;}
-  #passages .row{padding:12px 14px;}
+  #passages .row, #paperPassages .row{padding:12px 14px;}
 
   .foot{flex:none; padding-top:12px; display:flex; flex-direction:column; gap:9px;}
   .reviewrow{display:flex; align-items:center; gap:8px; width:100%; font-family:inherit; cursor:pointer;
@@ -313,9 +313,14 @@
   <!-- ===== 독해: 지문 목록 ===== -->
   <section id="rpassages" class="screen hidden">
     <div class="top"><button class="navback" id="pgBack">← UNIT</button><div class="brand">독해</div>
+      <div style="display:flex; gap:2px;">
       <button class="iconbtn" id="pgHelp" aria-label="표시 설명" title="표시 설명">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.6-2.9 4"/><path d="M12 17.2h.01"/></svg>
-      </button></div>
+      </button>
+      <button class="iconbtn" id="pgPaper" aria-label="시험지 만들기" title="시험지 만들기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      </button>
+      </div></div>
     <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
     <h2>지문 선택</h2>
     <p class="legend hidden" id="pgLegend"></p>
@@ -323,6 +328,14 @@
     <div class="foot">
       <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
     </div>
+  </section>
+
+  <!-- ===== 독해: 시험지 지문 고르기 ===== -->
+  <section id="rpaper" class="screen hidden">
+    <div class="top"><button class="navback" id="rpaperBack">← 지문</button><div class="brand"><small>시험지 만들기</small></div><span style="width:40px"></span></div>
+    <h2>지문 선택 · 시험지</h2>
+    <div class="scrolllist" id="rpScroll"><div class="list" id="paperPassages"></div></div>
+    <p class="note">지문을 누르면 인쇄용 시험지가 열립니다</p>
   </section>
 
   <!-- ===== 퀴즈 ===== -->
@@ -634,7 +647,7 @@ function todayBadge(k){
 }
 
 /* ===== 라우팅 ===== */
-const SCREENS = ["home","settings","progress","vsetup","vpaper","runits","rpassages","quiz","result"];
+const SCREENS = ["home","settings","progress","vsetup","vpaper","runits","rpassages","rpaper","quiz","result"];
 function show(id){ SCREENS.forEach(s=>$(s).classList.toggle("hidden", s!==id)); }
 function setSection(sec){ document.body.classList.toggle("reading-mode", sec==="reading"); }
 function goHome(){ cancelSpeak(); setSection(null); show("home"); }
@@ -771,6 +784,18 @@ async function openUnit(id){
   show("rpassages"); requestAnimationFrame(pgFade);
 }
 $("pgBack").onclick=()=>{ show("runits"); uFade(); };
+
+/* ===== 독해: 시험지 (지문 하나 = 한 장) ===== */
+function renderPaperPassages(){
+  const u=unitCache[curUnitId];
+  $("paperPassages").innerHTML = u.passages.map((p,i)=>
+    `<button class="row" data-pid="${p.id}"><span class="pnum">${i+1}</span>${rowHtml(p.title, `${p.words.length}단어`, false)}</button>`).join("");
+  $("paperPassages").querySelectorAll(".row").forEach(b=> b.onclick=()=>{
+    location.href = `paper.html?unit=${curUnitId}&p=${b.dataset.pid}&v=${Date.now()}`;
+  });
+}
+$("pgPaper").onclick=()=>{ renderPaperPassages(); show("rpaper"); requestAnimationFrame(rpFade); };
+$("rpaperBack").onclick=()=>{ show("rpassages"); pgFade(); };
 
 function passageCards(unitId, passageId){
   const p=unitCache[unitId].passages.find(x=>x.id===passageId);
@@ -965,7 +990,8 @@ const vFade  = bindFade("vScroll");
 const pFade  = bindFade("pScroll");
 const uFade  = bindFade("uScroll");
 const pgFade = bindFade("pgScroll");
-window.addEventListener("resize", ()=>{ vFade(); pFade(); uFade(); pgFade(); prFade(); });
+const rpFade = bindFade("rpScroll");
+window.addEventListener("resize", ()=>{ vFade(); pFade(); uFade(); pgFade(); rpFade(); prFade(); });
 
 renderAudioSwitch();
 renderRateSegs();
