@@ -1,6 +1,20 @@
 {
  "days": [
   {
+   "id": 16,
+   "file": "day16.json",
+   "title": "DAY 16  Shopping",
+   "subtitle": "Shopping",
+   "count": 30
+  },
+  {
+   "id": 15,
+   "file": "day15.json",
+   "title": "DAY 15  Travel",
+   "subtitle": "Travel",
+   "count": 30
+  },
+  {
    "id": 14,
    "file": "day14.json",
    "title": "DAY 14  Safety",
