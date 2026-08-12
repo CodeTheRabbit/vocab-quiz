@@ -437,6 +437,9 @@ let sess = null;   // {section:'voca'|'reading', mode:'normal'|'review', ordered
    되돌아가기로 채점을 취소할 수 있어야 하므로 오답을 쌓지 않고 자리별로 기록한다.
    wrong = 라운드가 끝난 뒤 marks 에서 계산한 오답 목록. */
 let deck=[], pos=0, flipped=false, marks=[], wrong=[], round=0;
+/* 자동 소리(발음·종소리) 예약. 카드를 빨리 넘기거나 연타로 뒤집으면 예약이 겹치므로 하나만 남긴다. */
+let autoTimer=null;
+const autoSound=(fn,ms)=>{ clearTimeout(autoTimer); autoTimer=setTimeout(fn,ms); };
 
 const $ = id => document.getElementById(id);
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
@@ -855,20 +858,24 @@ function renderCard(){
   $("bSpk").classList.toggle("show", !askEN);
   $("prog").style.width=(pos/deck.length*100)+"%";
   $("count").textContent=`${pos+1} / ${deck.length}`;
-  if(audioMode==="auto"){ askEN ? setTimeout(()=>speak(c.en,$("fSpk")),250) : setTimeout(chime,250); }
+  clearTimeout(autoTimer);
+  if(audioMode==="auto"){ askEN ? autoSound(()=>speak(c.en,$("fSpk")),250) : autoSound(chime,250); }
 }
 /* 앞뒤를 오갈 수 있다 — 뜻을 본 뒤 문제 단어를 다시 확인하려는 경우가 많다.
-   한 번 답을 본 카드는 앞면으로 돌아와도 채점 버튼과 안내문 숨김을 그대로 둔다. */
+   한 번 답을 본 카드는 앞면으로 돌아와도 채점 버튼과 안내문 숨김을 그대로 둔다.
+   자동발음이면 영어가 보이는 면으로 올 때마다 읽어 준다 — 뒤집어 다시 볼 때도 듣는다.
+   연타로 예약이 겹치면 엉뚱한 면의 소리가 나므로 직전 예약은 취소한다. */
 function flip(){
   flipped=!flipped;
   $("card").classList.toggle("flip", flipped);
+  const c=deck[pos];
   if(flipped){
     $("tapmsg").style.visibility="hidden";
     $("grade").classList.remove("hidden");
-    const c=deck[pos];
-    if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300);
+    if(audioMode==="auto" && c.dir==="KE") autoSound(()=>speak(c.en,$("bSpk")),300);
   } else {
-    cancelSpeak();   // 문제 면으로 돌아왔는데 답 발음이 이어지면 안 된다
+    cancelSpeak();   // KE 카드는 뒷면이 영어 — 문제 면에서 답이 들리면 안 된다
+    if(audioMode==="auto" && c.dir==="EK") autoSound(()=>speak(c.en,$("fSpk")),300);
   }
 }
 $("card").onclick=flip;
