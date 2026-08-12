@@ -91,9 +91,9 @@
     font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;}
   #passages .row, #paperPassages .row{padding:12px 14px;}
 
-  .foot{flex:none; padding-top:12px; display:flex; flex-direction:column; gap:9px;}
-  .reviewrow{display:flex; align-items:center; gap:8px; width:100%; font-family:inherit; cursor:pointer;
-    padding:14px 15px; border:1.5px solid #EED4C9; background:#FBEFEA; border-radius:13px;}
+  /* 오답 복습 — 목록 위 고정. 아래에 두면 DAY 를 훑는 동안 지나친다. */
+  .reviewrow{flex:none; display:flex; align-items:center; gap:8px; width:100%; font-family:inherit; cursor:pointer;
+    margin-bottom:10px; padding:14px 15px; border:1.5px solid #EED4C9; background:#FBEFEA; border-radius:13px;}
   .reviewrow .t{flex:1; text-align:left; font-size:13.5px; font-weight:700; color:var(--wrong-d);}
   .reviewrow .t b{font-weight:800;}
   .reviewrow .chev{color:var(--wrong-d); font-size:18px;}
@@ -166,6 +166,12 @@
   .front .spk svg{stroke:var(--cream);} .back .spk svg{stroke:var(--cream);}
   .spk.playing{animation:pulse .6s ease infinite;}
   @keyframes pulse{50%{transform:scale(1.12);}}
+  /* 이전 문제 — 카드 밖 왼쪽 위. 카드 안에 두면 뒤집기와 조작이 섞이고,
+     채점 버튼 근처에 두면 잘못 누른다. 글자를 남겨 「← 그만」과 구분한다. */
+  .prevbtn{align-self:flex-start; margin-bottom:10px; padding:7px 13px; border:1.5px solid var(--line);
+    border-radius:99px; background:transparent; color:var(--muted); font-family:inherit;
+    font-size:12.5px; font-weight:700; cursor:pointer;}
+  .prevbtn[disabled]{visibility:hidden;}
   .pos{display:inline-flex; align-items:center; justify-content:center; min-width:1.5em; height:1.5em;
     padding:0 .25em; margin-right:.3em; border:1.6px solid currentColor; border-radius:5px;
     font-size:.62em; font-weight:800; vertical-align:.12em; opacity:.85; line-height:1;}
@@ -288,11 +294,9 @@
       </button>
       </div></div>
     <h2>DAY 선택 · 최신이 위</h2>
+    <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span></button>
     <p class="legend hidden" id="vLegend"></p>
     <div class="scrolllist" id="vScroll"><div class="list" id="vdays"></div></div>
-    <div class="foot">
-      <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span></button>
-    </div>
   </section>
 
   <!-- ===== 단어: 시험지 DAY 고르기 ===== -->
@@ -323,11 +327,9 @@
       </div></div>
     <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
     <h2>지문 선택</h2>
+    <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
     <p class="legend hidden" id="pgLegend"></p>
     <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
-    <div class="foot">
-      <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
-    </div>
   </section>
 
   <!-- ===== 독해: 시험지 지문 고르기 ===== -->
@@ -346,6 +348,7 @@
       <div class="count" id="count">0 / 0</div>
     </div>
     <div class="card-wrap">
+      <button class="prevbtn" id="prev">← 이전 문제</button>
       <div class="card" id="card" tabindex="0" role="button" aria-label="카드 뒤집기">
         <div class="face front">
           <span class="tag" id="fTag">영어</span>
@@ -360,14 +363,14 @@
           <span class="tag" id="bTag">뜻</span>
           <span class="daylabel" id="bDay"></span>
           <div class="word" id="bWord"></div>
-          <span class="hint">맞았나요?</span>
+          <span class="hint">다시 눌러 문제 보기</span>
           <button class="spk" id="bSpk" aria-label="발음 듣기">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
           </button>
         </div>
       </div>
     </div>
-    <div id="tapflip" class="tapflip">종이에 써 본 뒤 카드를 눌러 확인</div>
+    <div id="tapflip" class="tapflip"><span id="tapmsg">종이에 써 본 뒤 카드를 눌러 확인</span></div>
     <div id="grade" class="grade hidden">
       <button class="btn wrong" id="gWrong">틀렸어요</button>
       <button class="btn right" id="gRight">알아요</button>
@@ -430,7 +433,10 @@ let speechRate = SPEECH_RATES[_s.rate] ? _s.rate : "normal";
 const saveSettings = () => LS.set(K_SETTINGS, {autoplay: audioMode==="auto", rate: speechRate});
 
 let sess = null;   // {section:'voca'|'reading', mode:'normal'|'review', ordered, dayId, unitId, passageId, label}
-let deck=[], pos=0, flipped=false, wrong=[], round=0;
+/* marks[i] = 카드별 채점 (true 알아요 · false 틀렸어요 · undefined 아직 안 함).
+   되돌아가기로 채점을 취소할 수 있어야 하므로 오답을 쌓지 않고 자리별로 기록한다.
+   wrong = 라운드가 끝난 뒤 marks 에서 계산한 오답 목록. */
+let deck=[], pos=0, flipped=false, marks=[], wrong=[], round=0;
 
 const $ = id => document.getElementById(id);
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
@@ -825,17 +831,18 @@ function startReadingReview(unitId, passageId){
 }
 
 /* ===== 퀴즈 엔진 (공통) ===== */
-function startQuiz(list){ if(!list.length) return; deck=list; pos=0; wrong=[]; round=0; show("quiz"); renderCard(); }
+function startQuiz(list){ if(!list.length) return; deck=list; pos=0; marks=[]; wrong=[]; round=0; show("quiz"); renderCard(); }
 function startRound(list){
   const copy=list.map(c=>({...c}));
   deck = sess.ordered ? dealReading(copy) : dealVoca(copy, false);
-  pos=0; wrong=[]; round++; show("quiz"); renderCard();
+  pos=0; marks=[]; wrong=[]; round++; show("quiz"); renderCard();
 }
 function renderCard(){
   const c=deck[pos]; flipped=false;
   $("card").classList.remove("flip");
   $("grade").classList.add("hidden");
-  $("tapflip").style.visibility="visible";
+  $("tapmsg").style.visibility="visible";
+  $("prev").disabled = pos===0;
   const askEN = c.dir==="EK";
   $("fTag").textContent = askEN?"영어":"뜻";
   $("bTag").textContent = askEN?"뜻":"영어";
@@ -850,20 +857,36 @@ function renderCard(){
   $("count").textContent=`${pos+1} / ${deck.length}`;
   if(audioMode==="auto"){ askEN ? setTimeout(()=>speak(c.en,$("fSpk")),250) : setTimeout(chime,250); }
 }
+/* 앞뒤를 오갈 수 있다 — 뜻을 본 뒤 문제 단어를 다시 확인하려는 경우가 많다.
+   한 번 답을 본 카드는 앞면으로 돌아와도 채점 버튼과 안내문 숨김을 그대로 둔다. */
 function flip(){
-  if(flipped) return; flipped=true;
-  $("card").classList.add("flip");
-  $("tapflip").style.visibility="hidden";
-  $("grade").classList.remove("hidden");
-  const c=deck[pos];
-  if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300);
+  flipped=!flipped;
+  $("card").classList.toggle("flip", flipped);
+  if(flipped){
+    $("tapmsg").style.visibility="hidden";
+    $("grade").classList.remove("hidden");
+    const c=deck[pos];
+    if(audioMode==="auto" && c.dir==="KE") setTimeout(()=>speak(c.en,$("bSpk")),300);
+  } else {
+    cancelSpeak();   // 문제 면으로 돌아왔는데 답 발음이 이어지면 안 된다
+  }
 }
 $("card").onclick=flip;
 $("card").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); } };
+
+/* 이전 문제 — 직전 채점을 취소하고 그 카드를 문제 면으로 되돌린다. */
+function prev(){
+  if(pos<=0) return;
+  cancelSpeak();
+  pos--;
+  marks[pos]=undefined;
+  renderCard();
+}
+$("prev").onclick=prev;
 $("fSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("fSpk")); };
 $("bSpk").onclick=e=>{ e.stopPropagation(); speak(deck[pos].en,$("bSpk")); };
 
-function grade(ok){ const c=deck[pos]; if(!ok) wrong.push(c); pos++;
+function grade(ok){ marks[pos]=ok; pos++;
   if(round===0) logProgress(pos);          // 본 라운드만 진행 기록 (반복 라운드는 덱이 오답뿐)
   if(pos>=deck.length) finish(); else renderCard(); }
 $("gRight").onclick=()=>grade(true);
@@ -878,6 +901,7 @@ function backToSetup(){
 /* ===== 결과 ===== */
 function finish(){
   cancelSpeak();
+  wrong = deck.filter((c,i)=> marks[i]===false);
   if(round===0){
     if(sess.section==="voca"){ sess.mode==="normal" ? addWrongsVoca(wrong) : settleReviewVoca(deck, wrong); }
     else { sess.mode==="normal" ? addWrongsReading(wrong) : settleReviewReading(deck, wrong); }
