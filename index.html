@@ -317,7 +317,7 @@
       </button>
       </div></div>
     <h2>DAY 선택 · 최신이 위</h2>
-    <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span><span class="rx" role="button" aria-label="이 오답 지우기">✕</span></button>
+    <div id="vReviews"></div>
     <p class="legend hidden" id="vLegend"></p>
     <div class="scrolllist" id="vScroll"><div class="list" id="vdays"></div></div>
   </section>
@@ -350,7 +350,7 @@
       </div></div>
     <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
     <h2>지문 선택</h2>
-    <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span><span class="rx" role="button" aria-label="이 오답 지우기">✕</span></button>
+    <div id="rReviews"></div>
     <p class="legend hidden" id="pgLegend"></p>
     <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
   </section>
@@ -623,19 +623,23 @@ function clearSolvedReading(cards, wrongs){
   if(!solved.size) return;
   LS.set(K_RWRONG, LS.get(K_RWRONG, []).filter(w=>!solved.has(w.en+"|"+w.unit+"|"+w.passage)));
 }
-/* '최근 오답 항목' (가안): lastSeen 이 가장 최근인 항목 하나 */
-function recentWrongVoca(){
-  const list=LS.get(K_WRONG, []); if(!list.length) return null;
-  const top=list.reduce((a,b)=> b.lastSeen>a.lastSeen ? b : a);
-  return { day:top.day, count:list.filter(w=>w.day===top.day).length };
+/* 남은 오답 전부 — 단어는 DAY 내림차순(아래 DAY 목록과 같은 순서),
+   독해는 그 UNIT 의 지문 순서. 데이터에서 사라진 지문의 오답도 지울 수 있게 끝에 붙인다. */
+function allWrongVoca(){
+  const cnt={};
+  LS.get(K_WRONG, []).forEach(w=>{ cnt[w.day]=(cnt[w.day]||0)+1; });
+  return Object.keys(cnt).map(Number).sort((a,b)=>b-a).map(day=>({day, count:cnt[day]}));
 }
-function recentWrongReading(unitId){
-  const list=LS.get(K_RWRONG, []).filter(w=>w.unit===unitId); if(!list.length) return null;
-  const top=list.reduce((a,b)=> b.lastSeen>a.lastSeen ? b : a);
-  const cnt=list.filter(w=>w.passage===top.passage).length;
-  const u=unitCache[unitId]; const p=u && u.passages.find(x=>x.id===top.passage);
-  return { unit:unitId, passage:top.passage, title:p?p.title:"지문", count:cnt };
+function allWrongReading(unitId){
+  const cnt={};
+  LS.get(K_RWRONG, []).forEach(w=>{ if(w.unit===unitId) cnt[w.passage]=(cnt[w.passage]||0)+1; });
+  const u=unitCache[unitId], out=[];
+  (u?u.passages:[]).forEach(p=>{ if(cnt[p.id]){ out.push({unit:unitId, passage:p.id, title:p.title, count:cnt[p.id]}); delete cnt[p.id]; } });
+  Object.keys(cnt).forEach(pid=>out.push({unit:unitId, passage:+pid, title:"지문 "+pid, count:cnt[pid]}));
+  return out;
 }
+const reviewRowHtml = (label, count) =>
+  `<button class="reviewrow"><span class="t">오답 복습 · <b>${label}</b> (${count})</span><span class="chev">›</span><span class="rx" role="button" aria-label="이 오답 지우기">✕</span></button>`;
 
 /* ===== 오답 지우기 (지난 시험 정리) =====
    복습 줄의 ✕ = 항목 단위 삭제. 확인창을 습관 탭으로 통과해도 5초 되돌리기가 안전망.
@@ -772,14 +776,14 @@ function renderVdays(){
   $("vdays").innerHTML = daysIndex.map((d,i)=>
     `<button class="row" data-id="${d.id}">${rowHtml(dayName(d), `${d.count}단어`, i===0, todayBadge("v"+d.id))}</button>`).join("");
   $("vdays").querySelectorAll(".row").forEach(b=> b.onclick=()=>startVocaStudy(+b.dataset.id));
-  // 오답 복습 (최근 DAY)
-  const rw=recentWrongVoca();
-  const btn=$("vReview");
-  if(rw){ btn.classList.remove("hidden");
-    btn.querySelector(".t").innerHTML=`오답 복습 · <b>DAY ${pad2(rw.day)}</b> (${rw.count})`;
-    btn.onclick=()=>startVocaReview(rw.day);
-    btn.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipeDayWrongs(rw.day, rw.count); };
-  } else btn.classList.add("hidden");
+  // 오답 복습 — 남아 있는 DAY 전부 (목록과 같은 내림차순)
+  const rws=allWrongVoca();
+  $("vReviews").innerHTML = rws.map(rw=>reviewRowHtml(`DAY ${pad2(rw.day)}`, rw.count)).join("");
+  $("vReviews").querySelectorAll(".reviewrow").forEach((b,i)=>{
+    const rw=rws[i];
+    b.onclick=()=>startVocaReview(rw.day);
+    b.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipeDayWrongs(rw.day, rw.count); };
+  });
 }
 async function loadVoca(){
   if(!daysIndex.length){
@@ -869,14 +873,14 @@ async function openUnit(id){
   $("passages").innerHTML = u.passages.map((p,i)=>
     `<button class="row" data-pid="${p.id}"><span class="pnum">${i+1}</span>${rowHtml(p.title, `${p.words.length}단어`, false, todayBadge(`r${id}:${p.id}`))}</button>`).join("");
   $("passages").querySelectorAll(".row").forEach(b=> b.onclick=()=>startReadingStudy(id, +b.dataset.pid));
-  // 오답 복습 (이 UNIT 내 최근 지문)
-  const rw=recentWrongReading(id);
-  const btn=$("rReview");
-  if(rw){ btn.classList.remove("hidden");
-    btn.querySelector(".t").innerHTML=`오답 복습 · <b>${rw.title}</b> (${rw.count})`;
-    btn.onclick=()=>startReadingReview(rw.unit, rw.passage);
-    btn.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipePassageWrongs(rw.unit, rw.passage, rw.title, rw.count); };
-  } else btn.classList.add("hidden");
+  // 오답 복습 — 이 UNIT 에 남아 있는 지문 전부 (지문 순서)
+  const rws=allWrongReading(id);
+  $("rReviews").innerHTML = rws.map(rw=>reviewRowHtml(rw.title, rw.count)).join("");
+  $("rReviews").querySelectorAll(".reviewrow").forEach((b,i)=>{
+    const rw=rws[i];
+    b.onclick=()=>startReadingReview(rw.unit, rw.passage);
+    b.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipePassageWrongs(rw.unit, rw.passage, rw.title, rw.count); };
+  });
   show("rpassages"); requestAnimationFrame(pgFade);
 }
 $("pgBack").onclick=()=>{ show("runits"); uFade(); };
