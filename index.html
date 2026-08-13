@@ -533,16 +533,30 @@ function dealVoca(cards, remember=true){
 function dealReading(cards){ cards.forEach(c=>c.dir="EK"); return cards; }
 
 /* ===== 오답 저장소 ===== */
-/* 단어: day 기준 누적 */
-function addWrongsVoca(cards){
-  if(!cards.length) return;
-  const list=LS.get(K_WRONG, []), d=Date.now();
-  cards.forEach(c=>{
-    const e=list.find(w=>w.en===c.en && w.day===c.dayId);
-    if(e){ e.missCount++; e.lastSeen=d; }
-    else list.push({en:c.en, ko:c.ko, day:c.dayId, missCount:1, lastSeen:d});
+/* 정규 학습 완주 = 그 항목(DAY/지문) 오답의 전면 정산. 정규 학습은 항상 항목 전체를
+   출제하므로, 완주 결과가 곧 그 항목 오답의 현재 상태다 — 맞힌 단어는 목록에서 빠지고
+   (데이터 교정으로 사라진 유령 항목 포함), 또 틀리면 횟수가 오르고, 새 오답은 추가된다. */
+function settleDayWrongs(dayId, wrongs){
+  const missed=new Map(wrongs.map(c=>[c.en, c]));
+  const d=Date.now();
+  const list=LS.get(K_WRONG, []).filter(w=>{
+    if(w.day!==dayId) return true;
+    if(missed.has(w.en)){ w.missCount++; w.lastSeen=d; missed.delete(w.en); return true; }
+    return false;
   });
+  missed.forEach(c=>list.push({en:c.en, ko:c.ko, day:dayId, missCount:1, lastSeen:d}));
   LS.set(K_WRONG, list);
+}
+function settlePassageWrongs(unitId, passageId, wrongs){
+  const missed=new Map(wrongs.map(c=>[c.en, c]));
+  const d=Date.now();
+  const list=LS.get(K_RWRONG, []).filter(w=>{
+    if(w.unit!==unitId || w.passage!==passageId) return true;
+    if(missed.has(w.en)){ w.missCount++; w.lastSeen=d; missed.delete(w.en); return true; }
+    return false;
+  });
+  missed.forEach(c=>list.push({en:c.en, ko:c.ko, unit:unitId, passage:passageId, missCount:1, lastSeen:d}));
+  LS.set(K_RWRONG, list);
 }
 function settleReviewVoca(cards, wrongs){
   const missed=new Set(wrongs.map(c=>c.en+"|"+c.dayId));
@@ -556,17 +570,6 @@ function settleReviewVoca(cards, wrongs){
   });
   LS.set(K_WRONG, list);
 }
-/* 독해: unit+passage 기준 누적 */
-function addWrongsReading(cards){
-  if(!cards.length) return;
-  const list=LS.get(K_RWRONG, []), d=Date.now();
-  cards.forEach(c=>{
-    const e=list.find(w=>w.en===c.en && w.unit===c.unitId && w.passage===c.passageId);
-    if(e){ e.missCount++; e.lastSeen=d; }
-    else list.push({en:c.en, ko:c.ko, unit:c.unitId, passage:c.passageId, missCount:1, lastSeen:d});
-  });
-  LS.set(K_RWRONG, list);
-}
 function settleReviewReading(cards, wrongs){
   const missed=new Set(wrongs.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
   const asked =new Set(cards.map(c=>c.en+"|"+c.unitId+"|"+c.passageId));
@@ -578,6 +581,22 @@ function settleReviewReading(cards, wrongs){
     return false;
   });
   LS.set(K_RWRONG, list);
+}
+/* 「틀린 것만 다시」 반복 라운드에서 맞힌 단어도 오답에서 졸업시킨다 — 어느 경로로 잡았든
+   성취가 같다는 배지 규칙(★)과 일치. 남아 있는 오답의 횟수는 본 라운드에서 이미 셌으므로
+   여기서는 올리지 않는다. */
+function clearSolvedVoca(cards, wrongs){
+  const missed=new Set(wrongs.map(c=>c.en+"|"+c.dayId));
+  const solved=new Set(cards.map(c=>c.en+"|"+c.dayId).filter(k=>!missed.has(k)));
+  if(!solved.size) return;
+  LS.set(K_WRONG, LS.get(K_WRONG, []).filter(w=>!solved.has(w.en+"|"+w.day)));
+}
+function clearSolvedReading(cards, wrongs){
+  const key=c=>c.en+"|"+c.unitId+"|"+c.passageId;
+  const missed=new Set(wrongs.map(key));
+  const solved=new Set(cards.map(key).filter(k=>!missed.has(k)));
+  if(!solved.size) return;
+  LS.set(K_RWRONG, LS.get(K_RWRONG, []).filter(w=>!solved.has(w.en+"|"+w.unit+"|"+w.passage)));
 }
 /* '최근 오답 항목' (가안): lastSeen 이 가장 최근인 항목 하나 */
 function recentWrongVoca(){
@@ -910,8 +929,10 @@ function finish(){
   cancelSpeak();
   wrong = deck.filter((c,i)=> marks[i]===false);
   if(round===0){
-    if(sess.section==="voca"){ sess.mode==="normal" ? addWrongsVoca(wrong) : settleReviewVoca(deck, wrong); }
-    else { sess.mode==="normal" ? addWrongsReading(wrong) : settleReviewReading(deck, wrong); }
+    if(sess.section==="voca"){ sess.mode==="normal" ? settleDayWrongs(sess.dayId, wrong) : settleReviewVoca(deck, wrong); }
+    else { sess.mode==="normal" ? settlePassageWrongs(sess.unitId, sess.passageId, wrong) : settleReviewReading(deck, wrong); }
+  } else {
+    sess.section==="voca" ? clearSolvedVoca(deck, wrong) : clearSolvedReading(deck, wrong);
   }
   if(round>0 && wrong.length>0){ startRound(wrong); return; }
   /* 여기 도달 = 본 라운드를 끝냈거나(오답 남음) 반복으로 오답을 0으로 만든 경우 */
