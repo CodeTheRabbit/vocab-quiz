@@ -97,6 +97,21 @@
   .reviewrow .t{flex:1; text-align:left; font-size:13.5px; font-weight:700; color:var(--wrong-d);}
   .reviewrow .t b{font-weight:800;}
   .reviewrow .chev{color:var(--wrong-d); font-size:18px;}
+  /* 오답 지우기 ✕ — 행 탭(복습 시작)과 충분히 떨어뜨리고 자체 터치 영역을 가진다 */
+  .reviewrow .rx{flex:none; width:32px; height:32px; margin-left:4px; display:flex; align-items:center;
+    justify-content:center; border-radius:10px; border:1.5px solid #EED4C9; background:#fff;
+    color:var(--wrong-d); font-size:14px; font-weight:800;}
+  /* 삭제 직후 되돌리기 토스트 */
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(26px + env(safe-area-inset-bottom));
+    max-width:min(92vw, 420px); background:var(--ink); color:#fff; border-radius:13px; padding:12px 16px;
+    font-size:13.5px; font-weight:700; display:flex; gap:14px; align-items:center; z-index:60;
+    box-shadow:0 8px 24px rgba(0,0,0,.28); opacity:0; pointer-events:none; transition:opacity .25s;}
+  .toast.show{opacity:1; pointer-events:auto;}
+  .toast button{font-family:inherit; border:0; background:none; color:#FFC94A; font-weight:800;
+    font-size:13.5px; cursor:pointer; padding:4px 2px; flex:none;}
+  /* 설정 — 오답 전체 초기화 버튼 */
+  .dangerbtn{font-family:inherit; font-size:13px; font-weight:800; color:var(--wrong-d);
+    border:1.5px solid #EED4C9; background:#FBEFEA; border-radius:11px; padding:9px 14px; cursor:pointer;}
   .paperrow{display:flex; align-items:center; gap:9px; width:100%; font-family:inherit; cursor:pointer;
     padding:13px 15px; border:1.5px dashed var(--line); background:transparent; border-radius:13px;
     color:var(--muted); font-weight:700; font-size:13.5px;}
@@ -273,6 +288,14 @@
         </div>
       </div>
       <p class="note" style="text-align:left; margin-top:14px;">영어만 발음합니다. 자동발음을 켜면 영어가 보이는 면에서 자동으로 소리가 납니다.</p>
+      <div class="optrow" style="margin-top:18px;">
+        <div class="optlbl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          오답 기록
+        </div>
+        <button class="dangerbtn" id="wipeWrong">전체 초기화</button>
+      </div>
+      <p class="note" style="text-align:left;">단어·독해의 오답 복습 기록을 모두 지웁니다. 지난 시험 범위를 정리할 때 쓰세요.</p>
     </div>
   </section>
 
@@ -294,7 +317,7 @@
       </button>
       </div></div>
     <h2>DAY 선택 · 최신이 위</h2>
-    <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span></button>
+    <button class="reviewrow hidden" id="vReview"><span class="t"></span><span class="chev">›</span><span class="rx" role="button" aria-label="이 오답 지우기">✕</span></button>
     <p class="legend hidden" id="vLegend"></p>
     <div class="scrolllist" id="vScroll"><div class="list" id="vdays"></div></div>
   </section>
@@ -327,7 +350,7 @@
       </div></div>
     <div class="unithero"><div class="uk" id="ruKicker">UNIT</div><div class="ut" id="ruTitle"></div><div class="us" id="ruSub"></div></div>
     <h2>지문 선택</h2>
-    <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span></button>
+    <button class="reviewrow hidden" id="rReview"><span class="t"></span><span class="chev">›</span><span class="rx" role="button" aria-label="이 오답 지우기">✕</span></button>
     <p class="legend hidden" id="pgLegend"></p>
     <div class="scrolllist" id="pgScroll"><div class="list" id="passages"></div></div>
   </section>
@@ -399,6 +422,8 @@
     </div>
   </section>
 </div>
+
+<div class="toast" id="undoToast" role="status"><span id="undoMsg"></span><button id="undoBtn">되돌리기</button></div>
 
 <script>
 /* ===== 조정 가능한 설정값 ===== */
@@ -612,6 +637,47 @@ function recentWrongReading(unitId){
   return { unit:unitId, passage:top.passage, title:p?p.title:"지문", count:cnt };
 }
 
+/* ===== 오답 지우기 (지난 시험 정리) =====
+   복습 줄의 ✕ = 항목 단위 삭제. 확인창을 습관 탭으로 통과해도 5초 되돌리기가 안전망.
+   설정의 전체 초기화는 부모의 주기 전환용 — 확인창만 두고 되돌리기는 없다. */
+let undoTimer=null, undoState=null;   // {v, r, rerender} — 삭제 직전 두 목록의 스냅샷
+function showUndo(msg, snap, rerender){
+  undoState={...snap, rerender};
+  $("undoMsg").textContent=msg;
+  $("undoToast").classList.add("show");
+  clearTimeout(undoTimer);
+  undoTimer=setTimeout(hideUndo, 5000);
+}
+function hideUndo(){ clearTimeout(undoTimer); $("undoToast").classList.remove("show"); undoState=null; }
+$("undoBtn").onclick=()=>{
+  if(undoState){
+    LS.set(K_WRONG, undoState.v); LS.set(K_RWRONG, undoState.r);
+    undoState.rerender();
+  }
+  hideUndo();
+};
+function wipeDayWrongs(day, count){
+  if(!confirm(`DAY ${pad2(day)} 오답 ${count}개를 지울까요?`)) return;
+  const snap={v:LS.get(K_WRONG, []), r:LS.get(K_RWRONG, [])};
+  LS.set(K_WRONG, snap.v.filter(w=>w.day!==day));
+  renderVdays();
+  showUndo(`DAY ${pad2(day)} 오답 ${count}개를 지웠어요`, snap, renderVdays);
+}
+function wipePassageWrongs(unit, passage, title, count){
+  if(!confirm(`'${title}' 오답 ${count}개를 지울까요?`)) return;
+  const snap={v:LS.get(K_WRONG, []), r:LS.get(K_RWRONG, [])};
+  LS.set(K_RWRONG, snap.r.filter(w=>!(w.unit===unit && w.passage===passage)));
+  openUnit(unit);
+  showUndo(`'${title}' 오답 ${count}개를 지웠어요`, snap, ()=>openUnit(unit));
+}
+$("wipeWrong").onclick=()=>{
+  const v=LS.get(K_WRONG, []).length, r=LS.get(K_RWRONG, []).length;
+  if(v+r===0){ alert("지울 오답이 없어요."); return; }
+  if(!confirm(`단어·독해 오답 ${v+r}개를 모두 지울까요?\n되돌릴 수 없습니다.`)) return;
+  LS.set(K_WRONG, []); LS.set(K_RWRONG, []);
+  hideUndo();   // 이전 항목 삭제의 되돌리기가 전체 초기화를 무효화하지 않도록
+};
+
 /* ===== 학습 기록 (vq.progress) =====
    세션 1건 = {k, label, n, done, end:"run"|"done"|"quit", clear, rev, t0, t1}
    k = 항목 키(단어 "v12" · 독해 "r7:1"). 배지·누적 횟수는 전부 이 배열에서 계산한다. */
@@ -712,6 +778,7 @@ function renderVdays(){
   if(rw){ btn.classList.remove("hidden");
     btn.querySelector(".t").innerHTML=`오답 복습 · <b>DAY ${pad2(rw.day)}</b> (${rw.count})`;
     btn.onclick=()=>startVocaReview(rw.day);
+    btn.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipeDayWrongs(rw.day, rw.count); };
   } else btn.classList.add("hidden");
 }
 async function loadVoca(){
@@ -808,6 +875,7 @@ async function openUnit(id){
   if(rw){ btn.classList.remove("hidden");
     btn.querySelector(".t").innerHTML=`오답 복습 · <b>${rw.title}</b> (${rw.count})`;
     btn.onclick=()=>startReadingReview(rw.unit, rw.passage);
+    btn.querySelector(".rx").onclick=e=>{ e.stopPropagation(); wipePassageWrongs(rw.unit, rw.passage, rw.title, rw.count); };
   } else btn.classList.add("hidden");
   show("rpassages"); requestAnimationFrame(pgFade);
 }
