@@ -1,6 +1,13 @@
 {
  "days": [
   {
+   "id": 23,
+   "file": "day23.json",
+   "title": "DAY 23  Describing Things",
+   "subtitle": "Describing Things",
+   "count": 30
+  },
+  {
    "id": 22,
    "file": "day22.json",
    "title": "DAY 22  Reading & Stories",
