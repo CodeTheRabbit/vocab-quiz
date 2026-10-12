@@ -1,6 +1,13 @@
 {
  "days": [
   {
+   "id": 24,
+   "file": "day24.json",
+   "title": "DAY 24  Describing Conditions",
+   "subtitle": "Describing Conditions",
+   "count": 30
+  },
+  {
    "id": 23,
    "file": "day23.json",
    "title": "DAY 23  Describing Things",
