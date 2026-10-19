@@ -1,0 +1,315 @@
+{
+ "id": 13,
+ "title": "UNIT 13  Space",
+ "subtitle": "Space",
+ "passages": [
+  {
+   "id": 1,
+   "title": "Space Potatoes",
+   "words": [
+    {
+     "en": "vegetable",
+     "ko": "명 채소"
+    },
+    {
+     "en": "grow",
+     "ko": "동 재배하다"
+    },
+    {
+     "en": "researcher",
+     "ko": "명 연구자"
+    },
+    {
+     "en": "easily",
+     "ko": "부 쉽게"
+    },
+    {
+     "en": "various",
+     "ko": "형 다양한"
+    },
+    {
+     "en": "soil",
+     "ko": "명 토양"
+    },
+    {
+     "en": "climate",
+     "ko": "명 기후"
+    },
+    {
+     "en": "condition",
+     "ko": "명 조건"
+    },
+    {
+     "en": "rich in",
+     "ko": "~이 풍부한"
+    },
+    {
+     "en": "crop",
+     "ko": "명 작물"
+    },
+    {
+     "en": "long-term",
+     "ko": "형 장기의, 장기적인"
+    },
+    {
+     "en": "plant",
+     "ko": "명 모종"
+    },
+    {
+     "en": "International Space Station",
+     "ko": "국제우주정거장"
+    },
+    {
+     "en": "place",
+     "ko": "동 놓다"
+    },
+    {
+     "en": "container",
+     "ko": "명 용기, 그릇"
+    },
+    {
+     "en": "special",
+     "ko": "형 특수한"
+    },
+    {
+     "en": "light",
+     "ko": "명 조명"
+    },
+    {
+     "en": "nutrient",
+     "ko": "명 영양분"
+    },
+    {
+     "en": "appear",
+     "ko": "동 나타나다"
+    },
+    {
+     "en": "look into",
+     "ko": "조사하다"
+    },
+    {
+     "en": "set up",
+     "ko": "설치하다"
+    },
+    {
+     "en": "facility",
+     "ko": "명 시설"
+    },
+    {
+     "en": "recreate",
+     "ko": "동 재현하다"
+    },
+    {
+     "en": "length",
+     "ko": "명 길이"
+    },
+    {
+     "en": "atmosphere",
+     "ko": "명 대기"
+    },
+    {
+     "en": "success",
+     "ko": "명 성공"
+    },
+    {
+     "en": "mean",
+     "ko": "동 의미하다"
+    },
+    {
+     "en": "astronaut",
+     "ko": "명 우주비행사"
+    },
+    {
+     "en": "produce",
+     "ko": "동 생산하다"
+    },
+    {
+     "en": "unusual",
+     "ko": "형 이례적인"
+    },
+    {
+     "en": "area",
+     "ko": "명 (연구) 대상, 분야"
+    },
+    {
+     "en": "play a role",
+     "ko": "역할을 하다"
+    },
+    {
+     "en": "common",
+     "ko": "형 흔한"
+    },
+    {
+     "en": "settle",
+     "ko": "동 정착하다"
+    },
+    {
+     "en": "goal",
+     "ko": "명 목표"
+    },
+    {
+     "en": "exploration",
+     "ko": "명 탐사"
+    },
+    {
+     "en": "farming",
+     "ko": "명 농업, 농사"
+    },
+    {
+     "en": "overcome",
+     "ko": "동 극복하다"
+    },
+    {
+     "en": "all kinds of",
+     "ko": "온갖 종류의"
+    },
+    {
+     "en": "dish",
+     "ko": "명 요리"
+    },
+    {
+     "en": "stay fresh",
+     "ko": "신선함을 유지하다"
+    },
+    {
+     "en": "achieve",
+     "ko": "동 (결과를) 얻다, 성취하다"
+    },
+    {
+     "en": "settlement",
+     "ko": "명 정착지"
+    },
+    {
+     "en": "significant",
+     "ko": "형 큰, 중요한"
+    },
+    {
+     "en": "impact",
+     "ko": "명 영향"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Time on Venus",
+   "words": [
+    {
+     "en": "similar",
+     "ko": "형 비슷한"
+    },
+    {
+     "en": "density",
+     "ko": "명 밀도"
+    },
+    {
+     "en": "difference",
+     "ko": "명 차이점"
+    },
+    {
+     "en": "complete",
+     "ko": "동 완주하다, 완료하다"
+    },
+    {
+     "en": "orbit",
+     "ko": "명 궤도"
+    },
+    {
+     "en": "last",
+     "ko": "동 지속되다"
+    },
+    {
+     "en": "rotation",
+     "ko": "명 자전"
+    },
+    {
+     "en": "a couple of",
+     "ko": "몇 가지의, 몇 개의"
+    },
+    {
+     "en": "factor",
+     "ko": "명 요인"
+    },
+    {
+     "en": "rotate",
+     "ko": "동 자전하다, 회전하다"
+    },
+    {
+     "en": "opposite",
+     "ko": "형 반대의, 다른 편의"
+    },
+    {
+     "en": "direction",
+     "ko": "명 방향"
+    },
+    {
+     "en": "decrease",
+     "ko": "동 줄이다, 감소시키다"
+    },
+    {
+     "en": "significantly",
+     "ko": "부 크게, 상당히"
+    },
+    {
+     "en": "thick",
+     "ko": "형 두꺼운"
+    },
+    {
+     "en": "stormy",
+     "ko": "형 폭풍우가 치는"
+    },
+    {
+     "en": "atmosphere",
+     "ko": "명 대기"
+    },
+    {
+     "en": "dense",
+     "ko": "형 밀도가 높은"
+    },
+    {
+     "en": "friction",
+     "ko": "명 마찰"
+    },
+    {
+     "en": "surface",
+     "ko": "명 지면"
+    },
+    {
+     "en": "slow down",
+     "ko": "(속도·진행)을 늦추다"
+    },
+    {
+     "en": "similarity",
+     "ko": "명 유사점"
+    },
+    {
+     "en": "method",
+     "ko": "명 방법"
+    },
+    {
+     "en": "measure",
+     "ko": "동 측정하다"
+    },
+    {
+     "en": "unusually",
+     "ko": "부 비정상적으로"
+    },
+    {
+     "en": "rocky",
+     "ko": "형 바위투성이인"
+    },
+    {
+     "en": "position",
+     "ko": "명 위치"
+    },
+    {
+     "en": "solar system",
+     "ko": "태양계"
+    },
+    {
+     "en": "characteristic",
+     "ko": "명 특성"
+    }
+   ]
+  }
+ ]
+}

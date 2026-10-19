@@ -1,0 +1,319 @@
+{
+ "id": 12,
+ "title": "UNIT 12  Psychology",
+ "subtitle": "Psychology",
+ "passages": [
+  {
+   "id": 1,
+   "title": "The Garcia Effect",
+   "words": [
+    {
+     "en": "food poisoning",
+     "ko": "식중독"
+    },
+    {
+     "en": "recover",
+     "ko": "동 회복하다"
+    },
+    {
+     "en": "probably",
+     "ko": "부 아마도"
+    },
+    {
+     "en": "taste",
+     "ko": "명 맛"
+    },
+    {
+     "en": "phenomenon",
+     "ko": "명 현상"
+    },
+    {
+     "en": "psychologist",
+     "ko": "명 심리학자"
+    },
+    {
+     "en": "come up with",
+     "ko": "~을 착안해 내다, 생각해 내다"
+    },
+    {
+     "en": "experiment",
+     "ko": "명 실험"
+    },
+    {
+     "en": "sweeten",
+     "ko": "동 설탕을 넣다"
+    },
+    {
+     "en": "expose",
+     "ko": "동 노출하다"
+    },
+    {
+     "en": "radiation",
+     "ko": "명 방사능"
+    },
+    {
+     "en": "refuse",
+     "ko": "동 거부하다"
+    },
+    {
+     "en": "cause",
+     "ko": "동 유발하다, 야기하다"
+    },
+    {
+     "en": "illness",
+     "ko": "명 질병, 병"
+    },
+    {
+     "en": "even though",
+     "ko": "비록 ~일지라도"
+    },
+    {
+     "en": "reaction",
+     "ko": "명 반응"
+    },
+    {
+     "en": "occur",
+     "ko": "동 발생하다, 일어나다"
+    },
+    {
+     "en": "regardless of",
+     "ko": "~과 관계없이"
+    },
+    {
+     "en": "smell",
+     "ko": "동 냄새를 맡다"
+    },
+    {
+     "en": "function",
+     "ko": "명 기능"
+    },
+    {
+     "en": "characteristic",
+     "ko": "명 특성"
+    },
+    {
+     "en": "develop",
+     "ko": "동 발달하다"
+    },
+    {
+     "en": "protection",
+     "ko": "명 보호"
+    },
+    {
+     "en": "mistake",
+     "ko": "명 실수"
+    },
+    {
+     "en": "psychology",
+     "ko": "명 심리학"
+    },
+    {
+     "en": "symptom",
+     "ko": "명 증상"
+    },
+    {
+     "en": "frightened",
+     "ko": "형 무서워하는"
+    },
+    {
+     "en": "thirsty",
+     "ko": "형 목이 마른, 갈증이 나는"
+    },
+    {
+     "en": "pain",
+     "ko": "명 통증"
+    },
+    {
+     "en": "portion",
+     "ko": "명 (음식의) 양, 부분"
+    },
+    {
+     "en": "frequently",
+     "ko": "부 자주, 흔히"
+    },
+    {
+     "en": "hate",
+     "ko": "동 싫어하다"
+    },
+    {
+     "en": "medicine",
+     "ko": "명 약"
+    },
+    {
+     "en": "deal with",
+     "ko": "치료하다, 처리하다"
+    },
+    {
+     "en": "evolve",
+     "ko": "동 발달하다, 진화하다"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Miller's Law",
+   "words": [
+    {
+     "en": "address",
+     "ko": "명 주소"
+    },
+    {
+     "en": "concept",
+     "ko": "명 개념"
+    },
+    {
+     "en": "well-known",
+     "ko": "형 유명한"
+    },
+    {
+     "en": "psychologist",
+     "ko": "명 심리학자"
+    },
+    {
+     "en": "focus",
+     "ko": "동 중점을 두다, 초점을 맞추다; 명 (관심·흥미 등의) 초점"
+    },
+    {
+     "en": "working memory",
+     "ko": "작업 기억"
+    },
+    {
+     "en": "temporarily",
+     "ko": "부 일시적으로"
+    },
+    {
+     "en": "remember",
+     "ko": "동 기억하다"
+    },
+    {
+     "en": "perform",
+     "ko": "동 수행하다, 실시하다"
+    },
+    {
+     "en": "task",
+     "ko": "명 작업"
+    },
+    {
+     "en": "one-time password",
+     "ko": "일회용 비밀번호(OTP)"
+    },
+    {
+     "en": "enter",
+     "ko": "동 입력하다"
+    },
+    {
+     "en": "hold",
+     "ko": "동 담다"
+    },
+    {
+     "en": "fortunately",
+     "ko": "부 다행히도"
+    },
+    {
+     "en": "technique",
+     "ko": "명 기술"
+    },
+    {
+     "en": "overcome",
+     "ko": "동 극복하다"
+    },
+    {
+     "en": "limitation",
+     "ko": "명 한계"
+    },
+    {
+     "en": "chunking",
+     "ko": "명 덩이 짓기"
+    },
+    {
+     "en": "involve",
+     "ko": "동 수반하다"
+    },
+    {
+     "en": "break",
+     "ko": "동 나누다, 쪼개다"
+    },
+    {
+     "en": "compare",
+     "ko": "동 비교하다"
+    },
+    {
+     "en": "chunk",
+     "ko": "명 덩어리"
+    },
+    {
+     "en": "instead of",
+     "ko": "~대신에"
+    },
+    {
+     "en": "individual",
+     "ko": "형 개별적인, 각각의"
+    },
+    {
+     "en": "especially",
+     "ko": "부 특히"
+    },
+    {
+     "en": "useful",
+     "ko": "형 유용한, 도움이 되는"
+    },
+    {
+     "en": "effectively",
+     "ko": "부 효과적으로"
+    },
+    {
+     "en": "communicate",
+     "ko": "동 전달하다"
+    },
+    {
+     "en": "break down",
+     "ko": "나누다, 분류하다"
+    },
+    {
+     "en": "ensure",
+     "ko": "동 ~하도록 하다, 보장하다"
+    },
+    {
+     "en": "improve",
+     "ko": "동 향상시키다, 개선하다"
+    },
+    {
+     "en": "weaken",
+     "ko": "동 약화하다, 약해지다"
+    },
+    {
+     "en": "short-term",
+     "ko": "형 단기의"
+    },
+    {
+     "en": "function",
+     "ko": "명 기능"
+    },
+    {
+     "en": "momentarily",
+     "ko": "부 잠깐 (동안)"
+    },
+    {
+     "en": "pick",
+     "ko": "동 선택하다"
+    },
+    {
+     "en": "limited",
+     "ko": "형 제한된"
+    },
+    {
+     "en": "capacity",
+     "ko": "명 용량"
+    },
+    {
+     "en": "practice",
+     "ko": "명 연습; 동 연습하다"
+    },
+    {
+     "en": "simplify",
+     "ko": "동 단순화하다"
+    }
+   ]
+  }
+ ]
+}
