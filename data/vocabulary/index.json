@@ -1,6 +1,20 @@
 {
  "days": [
   {
+   "id": 26,
+   "file": "day26.json",
+   "title": "DAY 26  Geography",
+   "subtitle": "Geography",
+   "count": 30
+  },
+  {
+   "id": 25,
+   "file": "day25.json",
+   "title": "DAY 25  Nature & Climates",
+   "subtitle": "Nature & Climates",
+   "count": 30
+  },
+  {
    "id": 24,
    "file": "day24.json",
    "title": "DAY 24  Describing Conditions",
