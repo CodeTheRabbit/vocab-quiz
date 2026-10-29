@@ -1,0 +1,367 @@
+{
+ "id": 14,
+ "title": "UNIT 14  Business",
+ "subtitle": "Business",
+ "passages": [
+  {
+   "id": 1,
+   "title": "Going Green",
+   "words": [
+    {
+     "en": "local",
+     "ko": "형 동네의, 지역의"
+    },
+    {
+     "en": "cloth",
+     "ko": "명 천"
+    },
+    {
+     "en": "plastic",
+     "ko": "형 비닐의, 비닐로 된"
+    },
+    {
+     "en": "offer",
+     "ko": "동 제공하다"
+    },
+    {
+     "en": "discount",
+     "ko": "명 할인 혜택"
+    },
+    {
+     "en": "business",
+     "ko": "명 기업, 회사"
+    },
+    {
+     "en": "go green",
+     "ko": "친환경적으로 되다"
+    },
+    {
+     "en": "notable",
+     "ko": "형 주목할 만한"
+    },
+    {
+     "en": "furniture",
+     "ko": "명 가구"
+    },
+    {
+     "en": "recognize",
+     "ko": "동 인식하다"
+    },
+    {
+     "en": "importance",
+     "ko": "명 중요성"
+    },
+    {
+     "en": "protect",
+     "ko": "동 보호하다"
+    },
+    {
+     "en": "environment",
+     "ko": "명 환경"
+    },
+    {
+     "en": "decision",
+     "ko": "명 결정"
+    },
+    {
+     "en": "renewable",
+     "ko": "형 재생 가능한"
+    },
+    {
+     "en": "energy source",
+     "ko": "에너지원"
+    },
+    {
+     "en": "remove",
+     "ko": "동 없애다"
+    },
+    {
+     "en": "packaging",
+     "ko": "명 포장"
+    },
+    {
+     "en": "in addition",
+     "ko": "게다가"
+    },
+    {
+     "en": "introduce",
+     "ko": "동 도입하다"
+    },
+    {
+     "en": "eco-friendly",
+     "ko": "형 친환경적인"
+    },
+    {
+     "en": "method",
+     "ko": "명 방법"
+    },
+    {
+     "en": "produce",
+     "ko": "동 생산하다"
+    },
+    {
+     "en": "product",
+     "ko": "명 제품"
+    },
+    {
+     "en": "involve",
+     "ko": "동 포함하다"
+    },
+    {
+     "en": "recyclable",
+     "ko": "형 재활용할 수 있는"
+    },
+    {
+     "en": "material",
+     "ko": "명 재료"
+    },
+    {
+     "en": "goal",
+     "ko": "명 목표"
+    },
+    {
+     "en": "reduce",
+     "ko": "동 줄이다"
+    },
+    {
+     "en": "environmental footprint",
+     "ko": "환경 발자국"
+    },
+    {
+     "en": "clothing",
+     "ko": "명 의류"
+    },
+    {
+     "en": "electricity",
+     "ko": "명 전력, 전기"
+    },
+    {
+     "en": "owner",
+     "ko": "명 소유주"
+    },
+    {
+     "en": "donate",
+     "ko": "동 기부하다"
+    },
+    {
+     "en": "entire",
+     "ko": "형 전체의"
+    },
+    {
+     "en": "nonprofit",
+     "ko": "형 비영리의"
+    },
+    {
+     "en": "found",
+     "ko": "동 설립하다, 세우다"
+    },
+    {
+     "en": "announce",
+     "ko": "동 발표하다"
+    },
+    {
+     "en": "profit",
+     "ko": "명 수익"
+    },
+    {
+     "en": "climate change",
+     "ko": "기후 변화"
+    },
+    {
+     "en": "essentially",
+     "ko": "부 본질적으로"
+    },
+    {
+     "en": "shareholder",
+     "ko": "명 주주"
+    },
+    {
+     "en": "versus",
+     "ko": "전 ~대, ~에 대하여"
+    },
+    {
+     "en": "get rid of",
+     "ko": "~을 없애다"
+    },
+    {
+     "en": "funding",
+     "ko": "명 자금"
+    },
+    {
+     "en": "support",
+     "ko": "동 지지하다"
+    },
+    {
+     "en": "run on",
+     "ko": "~으로 운영하다, ~을 연료로 삼다"
+    },
+    {
+     "en": "lower",
+     "ko": "동 줄이다, 낮추다"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Nuts-for-Candy Exchange",
+   "words": [
+    {
+     "en": "line up",
+     "ko": "줄을 서다"
+    },
+    {
+     "en": "factory",
+     "ko": "명 공장"
+    },
+    {
+     "en": "wagon",
+     "ko": "명 손수레"
+    },
+    {
+     "en": "bucket",
+     "ko": "명 양동이"
+    },
+    {
+     "en": "chestnut",
+     "ko": "명 밤"
+    },
+    {
+     "en": "acorn",
+     "ko": "명 도토리"
+    },
+    {
+     "en": "participate",
+     "ko": "동 참여하다"
+    },
+    {
+     "en": "cherish",
+     "ko": "동 소중히 하다"
+    },
+    {
+     "en": "tradition",
+     "ko": "명 전통"
+    },
+    {
+     "en": "trade",
+     "ko": "동 맞바꾸다, 교환하다"
+    },
+    {
+     "en": "nut",
+     "ko": "명 견과(류)"
+    },
+    {
+     "en": "delicious",
+     "ko": "형 맛있는"
+    },
+    {
+     "en": "sweet",
+     "ko": "명 사탕, 간식"
+    },
+    {
+     "en": "organize",
+     "ko": "동 (행사들을) 개최하다"
+    },
+    {
+     "en": "annual",
+     "ko": "형 연례의, 연례적인"
+    },
+    {
+     "en": "exchange",
+     "ko": "동 교환하다; 명 교환"
+    },
+    {
+     "en": "offer",
+     "ko": "동 제공하다"
+    },
+    {
+     "en": "in return",
+     "ko": "답례로"
+    },
+    {
+     "en": "alternatively",
+     "ko": "부 그렇지 않으면, 그 대신에"
+    },
+    {
+     "en": "participant",
+     "ko": "명 참가자"
+    },
+    {
+     "en": "collect",
+     "ko": "동 모으다"
+    },
+    {
+     "en": "Great Depression",
+     "ko": "대공황"
+    },
+    {
+     "en": "face",
+     "ko": "동 겪다, 직면하다"
+    },
+    {
+     "en": "financial",
+     "ko": "형 재정적인, 재정의"
+    },
+    {
+     "en": "difficulty",
+     "ko": "명 어려움"
+    },
+    {
+     "en": "luxury",
+     "ko": "명 사치품"
+    },
+    {
+     "en": "afford",
+     "ko": "동 (~을 살) 여유가 있다"
+    },
+    {
+     "en": "founder",
+     "ko": "명 설립자"
+    },
+    {
+     "en": "local",
+     "ko": "형 지역의"
+    },
+    {
+     "en": "stretch",
+     "ko": "동 이어지다, 뻗어 있다"
+    },
+    {
+     "en": "provide",
+     "ko": "동 제공하다"
+    },
+    {
+     "en": "wildlife",
+     "ko": "명 야생동물"
+    },
+    {
+     "en": "ingredient",
+     "ko": "명 재료"
+    },
+    {
+     "en": "beginning",
+     "ko": "명 시작"
+    },
+    {
+     "en": "occur",
+     "ko": "동 진행되다"
+    },
+    {
+     "en": "take place at",
+     "ko": "~에서 열리다"
+    },
+    {
+     "en": "limitless",
+     "ko": "형 무한한"
+    },
+    {
+     "en": "get rid of",
+     "ko": "처분하다, 제거하다"
+    },
+    {
+     "en": "feed",
+     "ko": "동 먹이를 주다"
+    }
+   ]
+  }
+ ]
+}
