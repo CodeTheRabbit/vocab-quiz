@@ -1,6 +1,20 @@
 {
  "days": [
   {
+   "id": 30,
+   "file": "day30.json",
+   "title": "DAY 30  Society",
+   "subtitle": "Society",
+   "count": 30
+  },
+  {
+   "id": 29,
+   "file": "day29.json",
+   "title": "DAY 29  Research & Experiments",
+   "subtitle": "Research & Experiments",
+   "count": 30
+  },
+  {
    "id": 28,
    "file": "day28.json",
    "title": "DAY 28  Technology",
