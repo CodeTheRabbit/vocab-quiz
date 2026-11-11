@@ -1,6 +1,13 @@
 {
  "days": [
   {
+   "id": 31,
+   "file": "day31.json",
+   "title": "DAY 31  Economy",
+   "subtitle": "Economy",
+   "count": 30
+  },
+  {
    "id": 30,
    "file": "day30.json",
    "title": "DAY 30  Society",
